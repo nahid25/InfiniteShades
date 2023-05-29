@@ -9,6 +9,12 @@ import {
   remove,
   update,
 } from "firebase/database";
+import {
+  ref as refData,
+  getDownloadURL,
+  getStorage,
+  uploadBytesResumable,
+} from "firebase/storage";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -26,6 +32,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const dbRef = getDatabase(app);
 const dbRefFetch = ref(getDatabase(app));
+const storage = getStorage(app);
 
 export interface User {
   id: string;
@@ -96,6 +103,41 @@ function reducer(state: State, action: Action): State {
       return state;
   }
 }
+
+// Upload image function
+export const uploadImage = async (
+  image: File,
+  onProgress: (progress: number) => void
+) => {
+  // Create a reference in the storage with the image name
+  const storageRef = refData(storage, `images/${image.name}`);
+  const uploadTask = uploadBytesResumable(storageRef, image);
+
+  return new Promise<{ url: string; name: string }>((resolve, reject) => {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        onProgress(progress);
+        console.log("Upload is " + progress + "% done");
+      },
+      (error) => {
+        console.error(error);
+        reject(error);
+      },
+      () => {
+        // Upload completed successfully, now we can get the download URL
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log("File available at", downloadURL);
+          // Resolve with an object that includes both the URL and the name
+          resolve({ url: downloadURL, name: image.name });
+        });
+      }
+    );
+  });
+};
 
 export const AppStateContext = createContext<
   [

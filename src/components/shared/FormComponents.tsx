@@ -6,7 +6,7 @@ interface title {
 }
 
 export const WelcomeTitle = ({ title }: title) => {
-  const name = localStorage.getItem("PostName") || "Guest";
+  const name = localStorage.getItem("UserName") || "Guest";
 
   return (
     <Heading as="h1" size="lg" p="25px" textAlign="center">
@@ -16,8 +16,8 @@ export const WelcomeTitle = ({ title }: title) => {
 };
 
 const hasNameAndId = () => {
-  const getID = localStorage.getItem("PostID");
-  const getName = localStorage.getItem("PostName");
+  const getID = localStorage.getItem("UserID");
+  const getName = localStorage.getItem("UserName");
   return !!(getID && getName);
 };
 
@@ -75,8 +75,8 @@ export const FormMessageInputUI = ({
   </FormControl>
 );
 
-export const FormSubmitButtonUI = ({ onSubmit }: any) => (
+export const FormSubmitButtonUI = ({ onSubmit, content }: any) => (
   <Button colorScheme="blue" onClick={onSubmit}>
-    Get In Touch
+    {content}
   </Button>
 );

@@ -3,6 +3,7 @@ import "./App.css";
 import Layout from "./components/shared/Layout";
 import { PrimaryButton } from "./components/shared/Button";
 import CreatePost from "./components/CreatePost/CreatePost";
+import ResponsiveLayout from "./components/ReadPost/ResponsiveLayout";
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
         </Link>,
         <CreatePost key="3" />,
       ]}
-      children={undefined}
+      children={<ResponsiveLayout />}
     ></Layout>
   );
 }
