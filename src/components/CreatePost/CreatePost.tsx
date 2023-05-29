@@ -140,9 +140,10 @@ const CreatePost = () => {
         height: height, // Use height from image dimension
         width: width, // Use width from image dimension
       },
+      userName: getName || name,
       userId: getId || userId, // use userId if getId is null
       image: `https://infiniteshades.imgix.net/${imageName}`,
-      text: data.message,
+      postMessage: data.message,
       likes: {}, // TODO: Need to write the logic for likes.
       comments: {}, // TODO: Need to write the logic for comments.
     };

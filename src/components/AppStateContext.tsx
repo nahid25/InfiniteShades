@@ -54,8 +54,9 @@ export interface Post {
     width: number;
   };
   userId: string;
+  userName: string;
   image: string;
-  text: string;
+  postMessage: string;
   likes: Record<string, boolean>;
   comments: Record<string, Comment>;
 }
