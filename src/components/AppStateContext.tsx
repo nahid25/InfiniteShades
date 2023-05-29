@@ -1,0 +1,254 @@
+import React, { createContext, useReducer, useContext, useEffect } from "react";
+import { initializeApp } from "firebase/app";
+import {
+  getDatabase,
+  ref,
+  child,
+  get,
+  set,
+  remove,
+  update,
+} from "firebase/database";
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDmbm3xl1Pv4aFszw3lHl4Yt1Q26Tg1d4M",
+  authDomain: "photography-d8b9c.firebaseapp.com",
+  databaseURL: "https://photography-d8b9c-default-rtdb.firebaseio.com",
+  projectId: "photography-d8b9c",
+  storageBucket: "photography-d8b9c.appspot.com",
+  messagingSenderId: "884601979242",
+  appId: "1:884601979242:web:15c6d0565ed1fdc918a513",
+  measurementId: "G-RD2SL5GR9Q",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const dbRef = getDatabase(app);
+const dbRefFetch = ref(getDatabase(app));
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  servicePrice?: number;
+  // Add additional properties as needed
+}
+
+export interface Post {
+  id: string;
+  dateUpdated: string;
+  dimension: {
+    height: number;
+    width: number;
+  };
+  userId: string;
+  image: string;
+  text: string;
+  likes: Record<string, boolean>;
+  comments: Record<string, Comment>;
+}
+
+interface Comment {
+  commentId: string;
+  userId: string;
+  text: string;
+  datePosted: string;
+}
+
+interface Feedback {
+  id: string;
+  datePosted: string;
+  userId: string;
+  text: string;
+}
+
+interface State {
+  users: Record<string, User>;
+  posts: Record<string, Post>;
+  feedbacks: Record<string, Feedback>;
+}
+
+type Action =
+  | { type: "SET_USERS"; payload: Record<string, User> }
+  | { type: "SET_POSTS"; payload: Record<string, Post> }
+  | { type: "SET_FEEDBACKS"; payload: Record<string, Feedback> };
+
+const initialState: State = {
+  users: {},
+  posts: {},
+  feedbacks: {},
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_USERS":
+      return { ...state, users: action.payload };
+    case "SET_POSTS":
+      return { ...state, posts: action.payload };
+    case "SET_FEEDBACKS":
+      return { ...state, feedbacks: action.payload };
+    default:
+      return state;
+  }
+}
+
+export const AppStateContext = createContext<
+  [
+    State,
+    React.Dispatch<Action>,
+    {
+      createData: (
+        path: "users" | "posts" | "feedbacks",
+        id: string,
+        userId: string,
+        data: User | Post | Feedback
+      ) => void;
+      updateData: (
+        path: "users" | "posts" | "feedbacks",
+        id: string,
+        userId: string,
+        data: Partial<User | Post | Feedback>
+      ) => void;
+      deleteData: (
+        path: "users" | "posts" | "feedbacks",
+        id: string,
+        userId: string
+      ) => void;
+      fetchData: (
+        path: string,
+        actionType: "SET_USERS" | "SET_POSTS" | "SET_FEEDBACKS"
+      ) => void;
+    }
+  ]
+>([
+  initialState,
+  () => null,
+  {
+    createData: () => {},
+    updateData: () => {},
+    deleteData: () => {},
+    fetchData: () => {},
+  },
+]);
+
+export function AppStateProvider({ children }: { children: React.ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    fetchData("users", "SET_USERS");
+  }, []);
+
+  // Fetch function
+  const fetchData = (
+    path: string,
+    actionType: "SET_USERS" | "SET_POSTS" | "SET_FEEDBACKS"
+  ) => {
+    get(child(dbRefFetch, path))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          dispatch({ type: actionType, payload: data });
+        } else {
+          console.log("No data available");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  // Create function
+  // Create function
+  const createData = (
+    path: "users" | "posts" | "feedbacks",
+    id: string,
+    userId: string,
+    data: User | Post | Feedback
+  ) => {
+    const newPath =
+      path === "posts" ? `${path}/${userId}-${id}` : `${path}/${id}`;
+
+    set(ref(dbRef, newPath), data)
+      .then(() => {
+        fetchData(
+          path,
+          `SET_${path.toUpperCase()}` as
+            | "SET_USERS"
+            | "SET_POSTS"
+            | "SET_FEEDBACKS"
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  // Update function
+  const updateData = (
+    path: "users" | "posts" | "feedbacks",
+    id: string,
+    userId: string,
+    data: Partial<User | Post | Feedback>
+  ) => {
+    update(ref(dbRef, `${path}/${userId}-${id}`), data)
+      .then(() => {
+        fetchData(
+          path,
+          `SET_${path.toUpperCase()}` as
+            | "SET_USERS"
+            | "SET_POSTS"
+            | "SET_FEEDBACKS"
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  // Delete function
+  const deleteData = (
+    path: "users" | "posts" | "feedbacks",
+    id: string,
+    userId: string
+  ) => {
+    remove(ref(dbRef, `${path}/${userId}-${id}`))
+      .then(() => {
+        fetchData(
+          path,
+          `SET_${path.toUpperCase()}` as
+            | "SET_USERS"
+            | "SET_POSTS"
+            | "SET_FEEDBACKS"
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  return (
+    <AppStateContext.Provider
+      value={[
+        state,
+        dispatch,
+        {
+          createData,
+          updateData,
+          deleteData,
+          fetchData, // Added fetchData here
+        },
+      ]}
+    >
+      {children}
+    </AppStateContext.Provider>
+  );
+}
+
+export function useAppState() {
+  return useContext(AppStateContext);
+}
