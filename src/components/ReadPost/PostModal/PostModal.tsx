@@ -26,7 +26,12 @@ interface PostModalProps {
 const PostModal = ({ isOpen, onClose, post }: PostModalProps) => {
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size={"6xl"}>
+      <Modal
+        isOpen={isOpen}
+        scrollBehavior={"inside"}
+        onClose={onClose}
+        size={"6xl"}
+      >
         <ModalOverlay />
         <ModalContent h="100vh">
           <ModalHeader></ModalHeader>

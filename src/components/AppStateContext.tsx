@@ -79,17 +79,20 @@ interface State {
   users: Record<string, User>;
   posts: Record<string, Post>;
   feedbacks: Record<string, Feedback>;
+  selectedPost: Post | null;
 }
 
 type Action =
   | { type: "SET_USERS"; payload: Record<string, User> }
   | { type: "SET_POSTS"; payload: Record<string, Post> }
-  | { type: "SET_FEEDBACKS"; payload: Record<string, Feedback> };
+  | { type: "SET_FEEDBACKS"; payload: Record<string, Feedback> }
+  | { type: "SELECT_POST"; payload: Post | null };
 
 const initialState: State = {
   users: {},
   posts: {},
   feedbacks: {},
+  selectedPost: null,
 };
 
 function reducer(state: State, action: Action): State {
@@ -100,6 +103,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, posts: action.payload };
     case "SET_FEEDBACKS":
       return { ...state, feedbacks: action.payload };
+    case "SELECT_POST":
+      return { ...state, selectedPost: action.payload };
     default:
       return state;
   }
@@ -166,6 +171,7 @@ export const AppStateContext = createContext<
         path: string,
         actionType: "SET_USERS" | "SET_POSTS" | "SET_FEEDBACKS"
       ) => void;
+      selectPost: (post: Post | null) => void;
     }
   ]
 >([
@@ -176,6 +182,7 @@ export const AppStateContext = createContext<
     updateData: () => {},
     deleteData: () => {},
     fetchData: () => {},
+    selectPost: () => {},
   },
 ]);
 
@@ -184,7 +191,12 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchData("users", "SET_USERS");
+    fetchData("posts", "SET_POSTS"); // Fetch posts data when the component mounts
   }, []);
+
+  const selectPost = (post: Post | null) => {
+    dispatch({ type: "SELECT_POST", payload: post });
+  };
 
   // Fetch function
   const fetchData = (
@@ -205,7 +217,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       });
   };
 
-  // Create function
   // Create function
   const createData = (
     path: "users" | "posts" | "feedbacks",
@@ -283,7 +294,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           createData,
           updateData,
           deleteData,
-          fetchData, // Added fetchData here
+          fetchData,
+          selectPost,
         },
       ]}
     >

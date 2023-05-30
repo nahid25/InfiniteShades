@@ -8,11 +8,15 @@ import {
 } from "react-icons/ai";
 import { useAppState, Post } from "../AppStateContext";
 import PostModal from "./PostModal/PostModal";
+import { useNavigate } from "react-router-dom";
 
 const ResponsiveLayout = () => {
   const [{ posts }, dispatch, { fetchData }] = useAppState();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+
+  const navigate = useNavigate();
+  const isMobileDevice = useMediaQuery("(max-width:600px)");
 
   const matchesSM = useMediaQuery("(max-width:600px)");
   const matchesMD = useMediaQuery("(min-width:600px) and (max-width:1200px)");
@@ -32,8 +36,13 @@ const ResponsiveLayout = () => {
   }, []);
 
   const handleImageClick = (post: Post) => {
-    setSelectedPost(post);
-    onOpen();
+    if (isMobileDevice) {
+      navigate(`/post/${post.id}/${post.userId}`);
+    } else {
+      console.log(post);
+      setSelectedPost(post);
+      onOpen();
+    }
   };
 
   return (
@@ -51,7 +60,6 @@ const ResponsiveLayout = () => {
                 <img
                   src={`${post.image}?w=500&fit=crop&auto=format`}
                   srcSet={`${post.image}?w=500&fit=crop&auto=format&dpr=2 2x`}
-                  alt={post.text}
                   loading="lazy"
                 />
                 <Box
