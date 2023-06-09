@@ -33,7 +33,7 @@ const PostStats = ({ message, postDate }: PostStatsProps) => {
           <VStack align="start">
             {/* Show the title of the post */}
             <Text>{message}</Text>
-            <Text fontSize="sm" color="gray.500">
+            <Text as="sub" color="gray.500">
               Posted on: {formattedDate}
             </Text>
           </VStack>

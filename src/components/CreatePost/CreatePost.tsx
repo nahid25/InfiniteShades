@@ -11,6 +11,7 @@ import {
   useDisclosure,
   Progress,
   Text,
+  Heading,
 } from "@chakra-ui/react";
 import { CustomButton } from "../shared/Button";
 import {
@@ -120,14 +121,14 @@ const CreatePost = () => {
         const uploadResult = await uploadImage(
           uploadedImage,
           (progress: number) => {
-            console.log("Upload progress:", progress);
+            // console.log("Upload progress:", progress);
             setUploadProgress(progress); // Update the upload progress state
           }
         );
         imageName = uploadResult.name;
         setIsLoading(false); // Stop loading when upload is done
       } catch (error) {
-        console.error("Error uploading image:", error);
+        // console.error("Error uploading image:", error);
         setIsLoading(false); // Stop loading when there is an error
       }
     }
@@ -152,26 +153,20 @@ const CreatePost = () => {
     createData("posts", post.id, post.userId, post);
   };
 
-  // The rendered component
-  return (
-    <>
-      <CustomButton
-        buttonText={"Create Post"}
-        onClick={() => {
-          setOverlay(<OverlayTwo />);
-          onOpen();
-        }}
-      />
-      <Modal isCentered isOpen={isOpen} size={"4xl"} onClose={onClose}>
-        {overlay}
-        <ModalContent>
-          <ModalHeader>
-            <WelcomeTitle title="share your post" /> {/* Title */}
-          </ModalHeader>
-          <ModalCloseButton />
+  // State for the current step of the form
+  const [step, setStep] = useState(1);
 
+  // Function to move to the next step
+  const nextStep = () => {
+    setStep((prevStep) => prevStep + 1);
+  };
+
+  // Function to get the modal body based on the current step
+  const getModalBody = () => {
+    switch (step) {
+      case 1:
+        return (
           <ModalBody>
-            {/* Upload Image */}
             <ImageInput onImageChange={onImageChange} />
             {imageError && (
               <Text color="red.500" fontSize="md">
@@ -192,7 +187,38 @@ const CreatePost = () => {
             />
             {/* Message input field */}
           </ModalBody>
+        );
+      case 2:
+        return (
+          <div>
+            <Heading>Modal 2</Heading>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // The rendered component
+  return (
+    <>
+      <CustomButton
+        buttonText={"Create Post"}
+        onClick={() => {
+          setOverlay(<OverlayTwo />);
+          onOpen();
+        }}
+      />
+      <Modal isCentered isOpen={isOpen} size={"4xl"} onClose={onClose}>
+        {overlay}
+        <ModalContent>
+          <ModalHeader>
+            <WelcomeTitle title="share your post" /> {/* Title */}
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>{getModalBody()}</ModalBody>
           <ModalFooter>
+            <Button mr={3}>Next</Button>
             <FormSubmitButtonUI
               onSubmit={handleSubmit(onSubmit)}
               content={"Submit"}

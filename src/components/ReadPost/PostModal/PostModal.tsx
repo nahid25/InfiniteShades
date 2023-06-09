@@ -62,7 +62,7 @@ const PostModal = ({ isOpen, onClose, post }: PostModalProps) => {
               </Box>
               {/* Post Comment */}
               <Box>
-                <PostComment />
+                <PostComment postId={post?.id} userId={post?.userId} />
               </Box>
             </Grid>
           </ModalBody>

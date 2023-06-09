@@ -1,5 +1,5 @@
 import { Skeleton, ThemeProvider, createTheme } from "@mui/material";
-import { Avatar, Box, Button, Flex } from "@chakra-ui/react";
+import { Box, Button, Flex } from "@chakra-ui/react";
 import {
   AiOutlineLike,
   AiOutlineComment,

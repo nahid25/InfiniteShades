@@ -29,6 +29,7 @@ const AboutPage = () => {
     <Layout
       hideSidebar={true}
       createCustomButton={[
+        // Custom buttons in the header
         <Link key="1" to="/about">
           <PrimaryButton buttonText={"About"} _disabled={true} />
         </Link>,
@@ -39,6 +40,7 @@ const AboutPage = () => {
       ]}
     >
       <Grid templateColumns="repeat(2, 1fr)" gap={6} position="relative">
+        {/* Left side image */}
         <Box w="100%">
           <Image
             src="\src\assets\left side.png"
@@ -48,6 +50,7 @@ const AboutPage = () => {
             height="100%"
           />
         </Box>
+        {/* Right side image */}
         <Box w="100%">
           <Image
             src="\src\assets\right side.png"
@@ -57,6 +60,7 @@ const AboutPage = () => {
             height="100%"
           />
         </Box>
+        {/* Centered content */}
         <Flex
           position="absolute"
           width={["100%", "80%", "70%", "70%"]}
@@ -89,7 +93,7 @@ const AboutPage = () => {
                   Unleash the Power of Visual Narratives
                 </Heading>
                 <Heading
-                  as="h1"
+                  as="h6"
                   fontFamily="'Poppins', sans-serif"
                   fontWeight="400"
                   color="GrayText"
@@ -99,9 +103,11 @@ const AboutPage = () => {
                   photographic stories.
                 </Heading>
                 <HStack spacing={["2", "4", "6", "10"]}>
+                  {/* Browse button */}
                   <Link to="/">
                     <Button size={["xs", "sm", "sm", "md"]}>Browse</Button>
                   </Link>
+                  {/* Create post button */}
                   <CreatePost />
                 </HStack>
               </VStack>
@@ -109,15 +115,18 @@ const AboutPage = () => {
           </Center>
         </Flex>
       </Grid>
+
+      {/* Feature timeline */}
       <Flex width="100%" height="auto">
         <FeatureTimeline />
       </Flex>
 
+      {/* Tech stack */}
       <Flex height="80vh" width="100%" mt={["30vh", "10vh", "10vh"]}>
         <TechStack />
       </Flex>
 
-      {/* other components */}
+      {/* Other components */}
       <Flex
         height="80vh"
         width="100%"
@@ -132,19 +141,20 @@ const AboutPage = () => {
           justifyContent="center"
           alignItems="center"
           width={["100%", "80%", "70%"]}
-          height="auto" // Adjust the height
+          height="auto"
           bgGradient="linear(to-b, #ffffff 2%, #ffffff 99%, #65d5ff 100%)"
           boxShadow="md"
           rounded="md"
-          overflow="auto" // Add overflow property
+          overflow="auto"
         >
           <CardBody>
             <Flex justifyContent="space-between" alignItems="center">
               <Box width="60%">
                 <Heading as="h1" size="xl" mb={4}>
-                  Welcome to Inifite Shade
+                  Welcome to Infinite Shade
                 </Heading>
                 <Text fontSize="sm">
+                  {/* Highlighted text */}
                   <Highlight
                     query={["Nahidul Ekon"]}
                     styles={{
@@ -155,7 +165,7 @@ const AboutPage = () => {
                       fontWeight: "800",
                     }}
                   >
-                    Greetings!I am Nahidul Ekon, a passionate software engineer
+                    Greetings! I am Nahidul Ekon, a passionate software engineer
                     and avid photographer. This platform combines technology and
                     art to showcase photographers like you. Join me on this
                     journey, where we explore the beauty around us. Your
@@ -164,10 +174,12 @@ const AboutPage = () => {
                   </Highlight>
                 </Text>
                 <HStack m={4} mt={8}>
+                  {/* Social links */}
                   <SocialLink />
                 </HStack>
               </Box>
               <Box>
+                {/* Profile image */}
                 <Image
                   borderRadius="full"
                   boxSize="200px"
@@ -182,6 +194,8 @@ const AboutPage = () => {
           <CardFooter></CardFooter>
         </Card>
       </Flex>
+
+      {/* Feedback section */}
       <VStack spacing={4} align="stretch" height={"110vh"} width="100%">
         <Image
           src="https://images.unsplash.com/photo-1515060939377-d73d9c162a66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1152&q=80"
@@ -195,7 +209,7 @@ const AboutPage = () => {
         />
         <Box h="80vh">
           <Flex direction="column" alignItems="center" height="100%">
-            <Stack>{/* Feedback Form Componenet. */}</Stack>
+            <Stack>{/* Feedback Form Component */}</Stack>
           </Flex>
         </Box>
       </VStack>

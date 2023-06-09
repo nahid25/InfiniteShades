@@ -11,6 +11,7 @@ import { HiUserCircle } from "react-icons/hi";
 import { BsHourglassSplit } from "react-icons/bs";
 import { IoDesktopOutline } from "react-icons/io5";
 
+// Create a custom theme for the Timeline component
 const theme = createTheme();
 
 const FeatureTimeline = () => {
@@ -18,6 +19,7 @@ const FeatureTimeline = () => {
     <>
       <ThemeProvider theme={theme}>
         <Timeline position="alternate">
+          {/* First timeline item */}
           <TimelineItem sx={{ height: "50vh" }}>
             <TimelineOppositeContent
               sx={{ m: "auto 0" }}
@@ -51,7 +53,7 @@ const FeatureTimeline = () => {
                 Introducing a new method of user interaction - no traditional
                 sign-up required. Our platform has innovatively reimagined user
                 experience and interaction. Users can effortlessly explore,
-                create and interact with posts without the constraint of
+                create, and interact with posts without the constraint of
                 creating an account or undergoing the usual authentication
                 process. Yet, should you choose to create an account, rest
                 assured all your shared information will be preserved securely
@@ -60,6 +62,7 @@ const FeatureTimeline = () => {
             </TimelineContent>
           </TimelineItem>
 
+          {/* Second timeline item */}
           <TimelineItem sx={{ height: "50vh" }}>
             <TimelineOppositeContent
               sx={{ m: "auto 0" }}
@@ -95,11 +98,12 @@ const FeatureTimeline = () => {
                 Looking ahead, we envision enhanced interaction capabilities and
                 AI-integrated features such as content recommendations and
                 automatic image categorization. As well as an option for
-                photographers and potentical client to interact with each other.
+                photographers and potential clients to interact with each other.
               </Typography>
             </TimelineContent>
           </TimelineItem>
 
+          {/* Third timeline item */}
           <TimelineItem sx={{ height: "50vh" }}>
             <TimelineOppositeContent
               sx={{ m: "auto 0" }}
@@ -124,7 +128,7 @@ const FeatureTimeline = () => {
                 component="span"
                 sx={{ fontFamily: "Poppins, sans-serif", fontWeight: "600" }}
               >
-                Modern and Resposnsive
+                Modern and Responsive
               </Typography>
               <Typography
                 sx={{ fontFamily: "Open Sans, sans-serif", fontWeight: "400" }}

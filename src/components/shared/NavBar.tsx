@@ -1,28 +1,71 @@
-import { Avatar, HStack, Spacer, Text } from "@chakra-ui/react";
+import { useContext, useEffect, useState } from "react";
+import {
+  Avatar,
+  Badge,
+  Button,
+  HStack,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+  Spacer,
+  Text,
+} from "@chakra-ui/react";
 import { SiPostcss } from "react-icons/si";
+import { Link } from "react-router-dom";
+import { LocalStorageContext } from "../LocalStorageContext";
 
-// Define a type for the props
 interface NavBarProps {
-  customButton?: JSX.Element[]; // Make customButton optional
+  customButton?: JSX.Element[];
 }
 
-// Add customButton to props
 const NavBar = ({ customButton }: NavBarProps) => {
+  const { name }: any = useContext(LocalStorageContext) || "";
+
   return (
     <HStack p={8} fontFamily="Poppins, sans-serif">
-      <SiPostcss size={40}></SiPostcss>
+      <SiPostcss size={40} />
       <Text>Infinite Shades</Text>
       <Spacer />
-      {/* About Button */}
-      {customButton} {/* Render customButton if it exists */}
-      <Avatar
-        m="10px ! important"
-        name="Nahid Ekon"
-        src=""
-        bgColor="cornflowerblue"
-        color="white"
-        size="md"
-      />
+      {customButton}
+      <Popover>
+        <PopoverTrigger>
+          <Avatar
+            as={Button}
+            name={name}
+            src=""
+            color="white"
+            size="md"
+            _hover={{ color: "#000000", borderColor: "#6495ED" }}
+          />
+        </PopoverTrigger>
+        <PopoverContent>
+          <PopoverArrow />
+          <PopoverCloseButton />
+          <PopoverHeader>
+            Welcome {name} <Badge>unactivated</Badge>
+          </PopoverHeader>
+          <PopoverBody>
+            User Name: {name} <br /> Name: {name} <br />
+            <Link to="/Login">
+              <Button
+                fontWeight="400"
+                color="#707070"
+                borderColor="green"
+                variant="outline"
+                _hover={{ color: "#000000", borderColor: "green" }}
+                size="md"
+                fontSize="sm"
+              >
+                Activate
+              </Button>
+            </Link>
+          </PopoverBody>
+        </PopoverContent>
+      </Popover>
     </HStack>
   );
 };

@@ -10,7 +10,7 @@ interface CustomButtonProps {
   onClick?: () => void; // or (event: React.MouseEvent<HTMLButtonElement>) => void; if you need access to the event
 }
 
-export const PrimaryButton = ({ buttonText, _disabled }: any) => {
+export const PrimaryButton = ({ buttonText, _disabled, size }: any) => {
   return (
     <Button
       m="10px ! important"
@@ -37,6 +37,7 @@ export const CustomButton = ({ buttonText, onClick }: CustomButtonProps) => {
       size="md"
       fontSize="sm"
       m="10px !important"
+      fontFamily="Poppins, sans-serif"
       onClick={onClick} // use the onClick prop here
     >
       {buttonText}

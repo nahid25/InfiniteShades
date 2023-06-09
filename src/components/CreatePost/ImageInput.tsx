@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button, VStack, Text } from "@chakra-ui/react";
+import { AiOutlineUpload } from "react-icons/ai";
 
 interface ImageInputProps {
   onImageChange: (image: File) => void;
@@ -29,7 +30,11 @@ const ImageInput = ({ onImageChange }: ImageInputProps) => {
 
   return (
     <VStack spacing={2}>
-      <Button onClick={handleClick} colorScheme="blue">
+      <Button
+        onClick={handleClick}
+        colorScheme="blue"
+        rightIcon={<AiOutlineUpload color="white" />}
+      >
         Upload Image
       </Button>
       <input

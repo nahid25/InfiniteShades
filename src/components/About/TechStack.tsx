@@ -14,6 +14,7 @@ import { AiFillApi } from "react-icons/ai";
 const TechStack = () => {
   return (
     <>
+      {/* Tech Stack Container */}
       <VStack
         display="flex"
         justifyContent="center"
@@ -29,9 +30,12 @@ const TechStack = () => {
         rounded="md"
         overflow="auto" // Add overflow property
       >
+        {/* Heading */}
         <Heading fontFamily="Poppins, sans-serif" fontWeight="800">
           TECH STACK
         </Heading>
+
+        {/* Tech Stack Cards */}
         <SimpleGrid
           columns={{ base: 1, md: 2, lg: 3 }}
           spacing={3}
@@ -39,6 +43,7 @@ const TechStack = () => {
           paddingRight={3}
           width="100%"
         >
+          {/* Frontend Card */}
           <Card>
             <CardHeader>
               <Heading size="sm">Frontend</Heading>
@@ -54,6 +59,8 @@ const TechStack = () => {
               </Text>
             </CardBody>
           </Card>
+
+          {/* Backend Card */}
           <Card>
             <CardHeader>
               <Heading size="sm">Backend</Heading>
@@ -68,6 +75,8 @@ const TechStack = () => {
               </Text>
             </CardBody>
           </Card>
+
+          {/* State Management API Card */}
           <Card>
             <CardHeader>
               <Heading size="sm">State Management API</Heading>

@@ -40,7 +40,6 @@ const ResponsiveLayout = () => {
     if (isMobileDevice) {
       navigate(`/post/${post.id}/${post.userId}`);
     } else {
-      console.log(post);
       setSelectedPost(post);
       onOpen();
     }
@@ -85,7 +84,7 @@ const ResponsiveLayout = () => {
                       alignItems="flex-end"
                     >
                       <Flex p="4">
-                        <Avatar name={post.userId} color="white" size="md" />
+                        <Avatar name={post.userName} color="white" size="md" />
                       </Flex>
                       <Flex p="4">
                         <Button variant="solid" leftIcon={<AiOutlineLike />} />

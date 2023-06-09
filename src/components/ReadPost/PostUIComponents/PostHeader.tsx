@@ -86,7 +86,7 @@ export const PostHeader = ({
                     }}
                     _focus={{ boxShadow: "none" }}
                   >
-                    <RiArrowDropDownFill />
+                    <RiArrowDropDownFill color="white" />
                   </MenuButton>
                 </Tooltip>
                 <MenuList fontSize={"sm"}>
