@@ -73,10 +73,20 @@ interface Comment {
   datePosted: string;
   postId: string;
   currentUserId: string;
+  replies?: Record<string, Comment>; // Added this line
 }
 
 interface CommentRecord {
   [key: string]: Comment;
+}
+
+interface Reply {
+  commentId: string;
+  userId: string;
+  text: string;
+  datePosted: string;
+  postId: string;
+  currentUserId: string;
 }
 
 interface Feedback {
@@ -97,7 +107,8 @@ interface State {
 type Action =
   | { type: "SET_USERS"; payload: Record<string, User> }
   | { type: "SET_POSTS"; payload: Record<string, Post> }
-  | { type: "SET_COMMENTS"; payload: CommentRecord } // Change this line
+  | { type: "SET_COMMENTS"; payload: CommentRecord }
+  | { type: "SET_REPLIES"; payload: Record<string, Reply> } // Add this line
   | { type: "SET_FEEDBACKS"; payload: Record<string, Feedback> };
 
 // The initial state of the application
@@ -171,6 +182,12 @@ export const AppStateContext = createContext<
         userId: string,
         data: any
       ) => void;
+      createReply: (
+        commentId: string, // The ID of the comment to which the reply belongs
+        id: string, // The ID of the reply
+        userId: string, // The ID of the user who is making the reply
+        data: Reply // The data of the reply
+      ) => void;
       updateData: (
         path: "users" | "posts" | "feedbacks",
         id: string,
@@ -196,6 +213,7 @@ export const AppStateContext = createContext<
     updateData: () => {},
     deleteData: () => {},
     fetchData: () => Promise.resolve(), // return a Promise
+    createReply: () => {},
   },
 ]);
 
@@ -244,31 +262,43 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   // Function to create new data in firebase and then fetch the updated data
   const createData = (
-    path: "users" | "posts" | "comments" | "feedbacks",
+    path: "users" | "posts" | "comments" | "feedbacks" | "replies", // Add "replies" here
     id: string,
     userId: string,
-    data: User | Post | Comment | Feedback // Add Comment here
+    data: User | Post | Comment | Feedback | Reply, // Add Reply here
+    parentId?: string
   ) => {
-    // Check if path is 'comments', use a different structure for comments key
-    const newPath =
-      path === "comments"
-        ? `${path}/${(data as Comment).userId}-${(data as Comment).postId}-${
-            (data as Comment).commentId
-          }`
-        : path === "posts"
-        ? `${path}/${userId}-${id}`
-        : `${path}/${id}`;
+    let newPath;
+    if (path === "comments") {
+      newPath = `${path}/${(data as Comment).userId}-${
+        (data as Comment).postId
+      }/${(data as Comment).commentId}`;
+    } else if (path === "replies") {
+      // Handle case for replies
+      newPath = `comments/${parentId}/replies/${id}`;
+    } else if (path === "posts") {
+      newPath = `${path}/${userId}-${id}`;
+    } else {
+      newPath = `${path}/${id}`;
+    }
 
     set(ref(dbRef, newPath), data)
       .then(() => {
-        fetchData(
-          path,
-          `SET_${path.toUpperCase()}` as
-            | "SET_USERS"
-            | "SET_POSTS"
-            | "SET_COMMENTS"
-            | "SET_FEEDBACKS"
-        );
+        if (path === "replies") {
+          fetchData(
+            `comments/${(data as Comment).userId}-${(data as Comment).postId}`,
+            "SET_COMMENTS"
+          );
+        } else {
+          fetchData(
+            path,
+            `SET_${path.toUpperCase()}` as
+              | "SET_USERS"
+              | "SET_POSTS"
+              | "SET_COMMENTS"
+              | "SET_FEEDBACKS"
+          );
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -277,21 +307,34 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   // Function to update data in firebase and then fetch the updated data
   const updateData = (
-    path: "users" | "posts" | "comments" | "feedbacks",
+    path: "users" | "posts" | "comments" | "feedbacks" | "replies", // Add "replies" here
     id: string,
     userId: string,
-    data: Partial<User | Post | Comment | Feedback>
+    data: Partial<User | Post | Comment | Feedback | Reply>, // Add Reply here
+    parentId?: string
   ) => {
-    update(ref(dbRef, `${path}/${userId}-${id}`), data)
+    let refPath;
+    if (path === "replies") {
+      // Handle case for replies
+      refPath = `comments/${userId}-${parentId}/replies/${id}`;
+    } else {
+      refPath = `${path}/${userId}-${id}`;
+    }
+
+    update(ref(dbRef, refPath), data)
       .then(() => {
-        fetchData(
-          path,
-          `SET_${path.toUpperCase()}` as
-            | "SET_USERS"
-            | "SET_POSTS"
-            | "SET_COMMENTS"
-            | "SET_FEEDBACKS"
-        );
+        if (path === "replies") {
+          fetchData(`comments/${userId}-${parentId}`, "SET_COMMENTS");
+        } else {
+          fetchData(
+            path,
+            `SET_${path.toUpperCase()}` as
+              | "SET_USERS"
+              | "SET_POSTS"
+              | "SET_COMMENTS"
+              | "SET_FEEDBACKS"
+          );
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -300,20 +343,51 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   // Function to delete data in firebase and then fetch the updated data
   const deleteData = (
-    path: "users" | "posts" | "comments" | "feedbacks",
+    path: "users" | "posts" | "comments" | "feedbacks" | "replies", // Add "replies" here
     id: string,
-    userId: string
+    userId: string,
+    parentId?: string
   ) => {
-    remove(ref(dbRef, `${path}/${userId}-${id}`))
+    let refPath;
+    if (path === "replies") {
+      // Handle case for replies
+      refPath = `comments/${userId}-${parentId}/replies/${id}`;
+    } else {
+      refPath = `${path}/${userId}-${id}`;
+    }
+
+    remove(ref(dbRef, refPath))
       .then(() => {
-        fetchData(
-          path,
-          `SET_${path.toUpperCase()}` as
-            | "SET_USERS"
-            | "SET_POSTS"
-            | "SET_COMMENTS"
-            | "SET_FEEDBACKS"
-        );
+        if (path === "replies") {
+          fetchData(`comments/${userId}-${parentId}`, "SET_COMMENTS");
+        } else {
+          fetchData(
+            path,
+            `SET_${path.toUpperCase()}` as
+              | "SET_USERS"
+              | "SET_POSTS"
+              | "SET_COMMENTS"
+              | "SET_FEEDBACKS"
+          );
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  // Function to create a new reply in firebase and then fetch the updated data
+  const createReply = (
+    commentId: string, // The ID of the comment to which the reply belongs
+    id: string, // The ID of the reply
+    userId: string, // The ID of the user who is making the reply
+    data: Reply // The data of the reply
+  ) => {
+    const refPath = `comments/${commentId}/replies/${id}`;
+
+    set(ref(dbRef, refPath), data)
+      .then(() => {
+        fetchData(`comments/${commentId}`, "SET_COMMENTS");
       })
       .catch((error) => {
         console.error(error);
@@ -330,6 +404,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           updateData,
           deleteData,
           fetchData,
+          createReply, // Here it is
         },
       ]}
     >

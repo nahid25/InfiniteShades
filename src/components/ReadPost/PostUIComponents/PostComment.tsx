@@ -22,31 +22,26 @@ const PostComment = ({ postId, userId }: any) => {
     if (comment.trim() !== "") {
       const commentData = {
         commentId: uuidv4(),
-        postId: postId, // Associate the comment with a postId
+        postId: postId,
         currentUserId: currentUserId,
         userId: userId,
         text: comment,
         datePosted: new Date().toISOString(),
       };
 
-      // Pass the postId as the second argument to the createData method
-      createData("comments", postId, userId, commentData);
+      createData("comments", postId, commentData.commentId, commentData);
       setComment("");
-      setReplyTo(""); // Clear the replied comment
+      setReplyTo("");
     }
   };
 
-  // Get the post's comments
-  const comments = state.comments || {};
+  const postComments = state.comments[`${userId}-${postId}`] || {};
 
-  // Filter comments to include only those related to the current postId
-  const relatedComments = Object.values(comments).filter(
-    (comment) => comment.postId === postId
-  );
+  const relatedComments = Object.values(postComments);
 
   const handleReply = (comment: any) => {
-    setReplyTo(comment.currentUserId); // Set the comment being replied to
-    setComment(`@${comment.currentUserId} `); // Populate the input box with the username
+    setReplyTo(comment.currentUserId);
+    setComment(`@${comment.currentUserId} `);
   };
 
   const formatDate = (dateString: any) => {
@@ -79,7 +74,7 @@ const PostComment = ({ postId, userId }: any) => {
           </Button>
         </HStack>
         <VStack align="start" spacing={4} mt={4}>
-          {relatedComments.map((comment) => (
+          {relatedComments.map((comment: any) => (
             <Box
               key={comment.commentId}
               borderWidth={1}
