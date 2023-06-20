@@ -15,8 +15,12 @@ import { v4 as uuidv4 } from "uuid";
 const PostComment = ({ postId, userId }: any) => {
   const [comment, setComment] = useState("");
   const [replyTo, setReplyTo] = useState("");
-  const [state, dispatch, { createData }] = useAppState();
+  const [state, dispatch, { createData, createReply }] = useAppState();
   let currentUserId = localStorage.getItem("UserID") || "";
+
+  const [commentUserId, setcommentUserId] = useState("");
+  const [commentPostId, setcommentPostId] = useState("");
+  const [commentId, setcommentId] = useState("");
 
   const handleSubmit = () => {
     if (comment.trim() !== "") {
@@ -29,7 +33,24 @@ const PostComment = ({ postId, userId }: any) => {
         datePosted: new Date().toISOString(),
       };
 
-      createData("comments", postId, commentData.commentId, commentData);
+      // If this is a reply, set the 'replies' field of the original comment
+      if (replyTo) {
+        createReply(
+          commentUserId, // the user who is making the reply
+          commentPostId, // the ID of the post to which the reply belongs
+          commentId, // the ID of the reply
+          commentData // the data of the reply
+        );
+      } else {
+        // Create a new comment
+        createData(
+          "comments",
+          commentData.commentId,
+          currentUserId,
+          commentData
+        );
+      }
+
       setComment("");
       setReplyTo("");
     }
@@ -42,6 +63,9 @@ const PostComment = ({ postId, userId }: any) => {
   const handleReply = (comment: any) => {
     setReplyTo(comment.currentUserId);
     setComment(`@${comment.currentUserId} `);
+    setcommentId(comment.commentId);
+    setcommentPostId(comment.postId);
+    setcommentUserId(comment.userId);
   };
 
   const formatDate = (dateString: any) => {
@@ -101,6 +125,17 @@ const PostComment = ({ postId, userId }: any) => {
                 <Text as="sub" color="gray.500">
                   {formatDate(comment.datePosted)}
                 </Text>
+                {/* Adding code for rendering replies here */}
+                {comment.replies &&
+                  Object.values(comment.replies).map((reply: any) => (
+                    <HStack spacing={4} align="center">
+                      <Avatar size="sm" name={reply.currentUserId} />
+                      <Text fontSize="sm">{reply.text}</Text>
+                      <Text as="sub" color="gray.500">
+                        {formatDate(reply.datePosted)}
+                      </Text>
+                    </HStack>
+                  ))}
               </VStack>
             </Box>
           ))}

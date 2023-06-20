@@ -8,6 +8,7 @@ import {
   set,
   remove,
   update,
+  push,
 } from "firebase/database";
 import {
   ref as refData,
@@ -108,7 +109,10 @@ type Action =
   | { type: "SET_USERS"; payload: Record<string, User> }
   | { type: "SET_POSTS"; payload: Record<string, Post> }
   | { type: "SET_COMMENTS"; payload: CommentRecord }
-  | { type: "SET_REPLIES"; payload: Record<string, Reply> } // Add this line
+  | {
+      type: "SET_REPLIES";
+      payload: { commentId: string; replies: CommentRecord };
+    }
   | { type: "SET_FEEDBACKS"; payload: Record<string, Feedback> };
 
 // The initial state of the application
@@ -128,10 +132,22 @@ function reducer(state: State, action: Action): State {
       return { ...state, posts: action.payload };
     case "SET_COMMENTS":
       return { ...state, comments: { ...state.comments, ...action.payload } };
-    case "SET_FEEDBACKS":
-      return { ...state, feedbacks: action.payload };
-    default:
+    case "SET_REPLIES": {
+      const { commentId, replies } = action.payload;
+      return {
+        ...state,
+        comments: {
+          ...state.comments,
+          [commentId]: {
+            ...state.comments[commentId],
+            replies,
+          },
+        },
+      };
+    }
+    default: {
       return state;
+    }
   }
 }
 
@@ -183,9 +199,9 @@ export const AppStateContext = createContext<
         data: any
       ) => void;
       createReply: (
-        commentId: string, // The ID of the comment to which the reply belongs
-        id: string, // The ID of the reply
         userId: string, // The ID of the user who is making the reply
+        postId: string, // The ID of the post to which the reply belongs
+        commentId: string, // The ID of the comment to which the reply belongs
         data: Reply // The data of the reply
       ) => void;
       updateData: (
@@ -262,10 +278,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   // Function to create new data in firebase and then fetch the updated data
   const createData = (
-    path: "users" | "posts" | "comments" | "feedbacks" | "replies", // Add "replies" here
+    path: "users" | "posts" | "comments" | "feedbacks" | "replies",
     id: string,
     userId: string,
-    data: User | Post | Comment | Feedback | Reply, // Add Reply here
+    data: User | Post | Comment | Feedback | Reply,
     parentId?: string
   ) => {
     let newPath;
@@ -376,18 +392,20 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       });
   };
 
-  // Function to create a new reply in firebase and then fetch the updated data
   const createReply = (
-    commentId: string, // The ID of the comment to which the reply belongs
-    id: string, // The ID of the reply
-    userId: string, // The ID of the user who is making the reply
-    data: Reply // The data of the reply
+    commentUserId: string,
+    commentPostId: string,
+    commentId: string,
+    data: Reply
   ) => {
-    const refPath = `comments/${commentId}/replies/${id}`;
+    const refPath = `comments/${commentUserId}-${commentPostId}/${commentId}/replies`;
 
-    set(ref(dbRef, refPath), data)
+    const newReplyRef = push(ref(dbRef, refPath));
+    const replyId = newReplyRef.key;
+
+    set(ref(dbRef, `${refPath}/${replyId}`), data)
       .then(() => {
-        fetchData(`comments/${commentId}`, "SET_COMMENTS");
+        fetchData(`comments/${commentUserId}-${commentPostId}`, "SET_COMMENTS");
       })
       .catch((error) => {
         console.error(error);
@@ -404,7 +422,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           updateData,
           deleteData,
           fetchData,
-          createReply, // Here it is
+          createReply,
         },
       ]}
     >
