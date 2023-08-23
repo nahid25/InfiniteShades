@@ -39,7 +39,11 @@ const PostModal = ({ isOpen, onClose, post }: PostModalProps) => {
             <Grid templateRows="1fr 3fr auto auto" h="60vh" gap={4}>
               {/* Post header section */}
               <Box>
-                <PostHeader name={post?.userName} handleModalClose={onClose} />
+                <PostHeader
+                  name={post?.userName}
+                  handleModalClose={onClose}
+                  post={post}
+                />
               </Box>
               {/* Post body image section */}
               <Box mr={2}>
@@ -54,6 +58,9 @@ const PostModal = ({ isOpen, onClose, post }: PostModalProps) => {
                 <PostStats
                   message={post?.postMessage}
                   postDate={post?.dateUpdated}
+                  viewCount={post?.views}
+                  downloadCount={post?.downloads}
+                  commentsCount={Object.keys(post?.comments || {}).length}
                 />
               </Flex>
               <Box>

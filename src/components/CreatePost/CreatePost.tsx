@@ -147,6 +147,7 @@ const CreatePost = () => {
       postMessage: data.message,
       likes: {}, // TODO: Need to write the logic for likes.
       comments: {}, // TODO: Need to write the logic for comments.
+      views: 0,
     };
 
     // Using Context `createData` to uplodad to Firebase.

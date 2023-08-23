@@ -6,13 +6,18 @@ import {
   AiOutlineComment,
   AiOutlineShareAlt,
 } from "react-icons/ai";
-import { useAppState, Post } from "../AppStateContext";
+import {
+  useAppState,
+  Post,
+  ViewCountIncrementPayload,
+} from "../AppStateContext";
 import PostModal from "./PostModal/PostModal";
 import { useNavigate } from "react-router-dom";
 import MasonryItemSkeleton from "./MasonryItemSkeleton";
 
 const ResponsiveLayout = () => {
-  const [{ posts }, dispatch, { fetchData }] = useAppState();
+  const [{ posts }, dispatch, { fetchData, incrementViewCount }] =
+    useAppState();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
@@ -42,6 +47,15 @@ const ResponsiveLayout = () => {
     } else {
       setSelectedPost(post);
       onOpen();
+
+      // Call incrementViewCount here to increase the view count
+      const payload: ViewCountIncrementPayload = {
+        postId: post.id,
+        viewCount: post.views + 1, // Increment the current view count by 1
+      };
+      incrementViewCount(payload);
+
+      console.log("commentsCount after increment:", post.commentsCount);
     }
   };
 

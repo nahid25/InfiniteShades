@@ -9,13 +9,17 @@ import {
   Avatar,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useAppState } from "../../AppStateContext";
+import {
+  CommentCountIncrementPayload,
+  useAppState,
+} from "../../AppStateContext";
 import { v4 as uuidv4 } from "uuid";
 
-const PostComment = ({ postId, userId }: any) => {
+const PostComment = ({ postId, userId, commentCount }: any) => {
   const [comment, setComment] = useState("");
   const [replyTo, setReplyTo] = useState("");
-  const [state, dispatch, { createData, createReply }] = useAppState();
+  const [state, dispatch, { createData, createReply, incrementCommentCount }] =
+    useAppState();
   let currentUserId = localStorage.getItem("UserID") || "";
 
   const [commentUserId, setcommentUserId] = useState("");
@@ -35,14 +39,22 @@ const PostComment = ({ postId, userId }: any) => {
 
       // If this is a reply, set the 'replies' field of the original comment
       if (replyTo) {
-        createReply(
-          commentUserId, // the user who is making the reply
-          commentPostId, // the ID of the post to which the reply belongs
-          commentId, // the ID of the reply
-          commentData // the data of the reply
-        );
+        // Increment the comment count for the relevant post
+        const commentCountPayload: CommentCountIncrementPayload = {
+          postId: commentPostId,
+          commentCount: relatedComments.length + 1, // Increment the comment count
+        };
+        incrementCommentCount(commentCountPayload);
+
+        createReply(commentUserId, commentPostId, commentId, commentData);
       } else {
-        // Create a new comment
+        // Increment the comment count for the relevant post
+        const commentCountPayload: CommentCountIncrementPayload = {
+          postId: commentPostId,
+          commentCount: relatedComments.length + 1, // Increment the comment count
+        };
+        incrementCommentCount(commentCountPayload);
+
         createData(
           "comments",
           commentData.commentId,
@@ -108,7 +120,14 @@ const PostComment = ({ postId, userId }: any) => {
             >
               <VStack align="start" spacing={2}>
                 <HStack spacing={4} align="center">
-                  <Avatar size="sm" name={comment.currentUserId} />
+                  <Avatar
+                    size="sm"
+                    name={
+                      state.users[comment.currentUserId]
+                        ? state.users[comment.currentUserId].name
+                        : ""
+                    }
+                  />
                   <Text fontSize="sm">{comment.text}</Text>
                   <Button
                     m="10px ! important"
@@ -122,21 +141,54 @@ const PostComment = ({ postId, userId }: any) => {
                     Reply
                   </Button>
                 </HStack>
-                <Text as="sub" color="gray.500">
+                <Text
+                  as="sub"
+                  color="gray.500"
+                  marginBottom="20px !important"
+                  marginTop="20px !important"
+                >
                   {formatDate(comment.datePosted)}
                 </Text>
                 {/* Adding code for rendering replies here */}
                 {comment.replies &&
                   Object.values(comment.replies).map((reply: any) => (
-                    <HStack spacing={4} align="center">
-                      <Avatar size="sm" name={reply.currentUserId} />
+                    <HStack
+                      key={reply.commentId}
+                      spacing={4}
+                      align="center"
+                      margin="20px 20px 20px 20px !important"
+                    >
+                      <Avatar
+                        size="sm"
+                        name={
+                          state.users[reply.currentUserId]
+                            ? state.users[reply.currentUserId].name
+                            : ""
+                        }
+                      />
+
                       <Text fontSize="sm">{reply.text}</Text>
                       <Text as="sub" color="gray.500">
                         {formatDate(reply.datePosted)}
                       </Text>
+                      <Button
+                        m="10px ! important"
+                        variant="link"
+                        colorScheme="blackAlpha"
+                        fontSize="xs"
+                        _hover={{ color: "#000000" }}
+                        _active={{ color: "cornflowerblue" }}
+                        onClick={() => handleReply(comment)}
+                      >
+                        Reply
+                      </Button>
                     </HStack>
                   ))}
               </VStack>
+              <Text mt={2}>
+                {relatedComments.length}{" "}
+                {relatedComments.length === 1 ? "Comment" : "Comments"}
+              </Text>
             </Box>
           ))}
         </VStack>

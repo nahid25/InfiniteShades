@@ -65,6 +65,9 @@ export interface Post {
   postMessage: string;
   likes: Record<string, boolean>;
   comments: Record<string, Comment>;
+  views: number;
+  downloads: number;
+  commentsCount: number;
 }
 
 interface Comment {
@@ -96,6 +99,20 @@ interface Feedback {
   userId: string;
   text: string;
 }
+export interface ViewCountIncrementPayload {
+  postId: string;
+  viewCount: number;
+}
+
+interface DownloadCountIncrementPayload {
+  postId: string;
+  downloadCount: number;
+}
+
+export interface CommentCountIncrementPayload {
+  postId: string;
+  commentCount: number;
+}
 
 // Define the state interface and the action types
 interface State {
@@ -113,7 +130,13 @@ type Action =
       type: "SET_REPLIES";
       payload: { commentId: string; replies: CommentRecord };
     }
-  | { type: "SET_FEEDBACKS"; payload: Record<string, Feedback> };
+  | { type: "SET_FEEDBACKS"; payload: Record<string, Feedback> }
+  | { type: "INCREMENT_VIEW_COUNT"; payload: ViewCountIncrementPayload }
+  | {
+      type: "INCREMENT_DOWNLOAD_COUNT";
+      payload: DownloadCountIncrementPayload;
+    }
+  | { type: "INCREMENT_COMMENT_COUNT"; payload: CommentCountIncrementPayload };
 
 // The initial state of the application
 const initialState: State = {
@@ -128,8 +151,28 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "SET_USERS":
       return { ...state, users: action.payload };
-    case "SET_POSTS":
-      return { ...state, posts: action.payload };
+    case "SET_POSTS": {
+      // Convert the object of posts to an array of posts
+      const postsArray = Object.values(action.payload);
+
+      // Calculate comment counts and update the posts
+      const postsWithViewsAndComments = postsArray.reduce(
+        (postsDict: Record<string, Post>, post: Post) => {
+          if (!post.hasOwnProperty("views")) {
+            post.views = 0;
+          }
+          if (!post.hasOwnProperty("comments")) {
+            post.comments = {};
+          }
+          const commentsCount = Object.keys(post.comments).length;
+          return { ...postsDict, [post.id]: { ...post, commentsCount } };
+        },
+        {}
+      );
+
+      return { ...state, posts: postsWithViewsAndComments };
+    }
+
     case "SET_COMMENTS":
       return { ...state, comments: { ...state.comments, ...action.payload } };
     case "SET_REPLIES": {
@@ -145,6 +188,88 @@ function reducer(state: State, action: Action): State {
         },
       };
     }
+
+    case "INCREMENT_DOWNLOAD_COUNT": {
+      const { postId, downloadCount } = action.payload;
+
+      // Update the download count in Firebase
+      const postKey = `${state.posts[postId].userId}-${postId}`;
+      update(ref(dbRef, `posts/${postKey}`), {
+        downloads: downloadCount,
+      }).catch((error) => {
+        console.error("Error updating download count:", error);
+      });
+
+      // Update the download count in local state (Redux store)
+      const updatedPosts = {
+        ...state.posts,
+        [postId]: {
+          ...state.posts[postId],
+          downloads: downloadCount,
+        },
+      };
+
+      return {
+        ...state,
+        posts: updatedPosts,
+      };
+    }
+
+    case "INCREMENT_COMMENT_COUNT": {
+      const { postId, commentCount } = action.payload;
+
+      // Update the comment count in the local state (Redux store)
+      const updatedPosts = {
+        ...state.posts,
+        [postId]: {
+          ...state.posts[postId],
+          commentsCount: commentCount,
+        },
+      };
+
+      return {
+        ...state,
+        posts: updatedPosts,
+      };
+    }
+
+    case "INCREMENT_VIEW_COUNT": {
+      const { postId, viewCount } = action.payload;
+
+      // Create the correct post ID in the format "userId-postId"
+      const postKey = `${state.posts[postId].userId}-${postId}`;
+
+      // Update the view count in the local state (Redux store)
+      const updatedPosts = {
+        ...state.posts,
+        [postId]: {
+          ...state.posts[postId],
+          views: viewCount,
+        },
+      };
+
+      // Update the view count in Firebase
+      update(ref(dbRef, `posts/${postKey}`), {
+        views: viewCount,
+      })
+        .then(() => {
+          console.log("View count updated successfully!");
+          // After successfully updating the view count, remove the duplicate entry
+          return remove(ref(dbRef, `posts/${postId}`));
+        })
+        .then(() => {
+          console.log("Duplicate entry removed successfully!");
+        })
+        .catch((error) => {
+          console.error("Error updating view count:", error);
+        });
+
+      return {
+        ...state,
+        posts: updatedPosts,
+      };
+    }
+
     default: {
       return state;
     }
@@ -219,6 +344,9 @@ export const AppStateContext = createContext<
         path: string,
         actionType: "SET_USERS" | "SET_POSTS" | "SET_FEEDBACKS"
       ) => Promise<any>;
+      incrementViewCount: (payload: ViewCountIncrementPayload) => void;
+      incrementDownloadCount: (payload: DownloadCountIncrementPayload) => void;
+      incrementCommentCount: (payload: CommentCountIncrementPayload) => void;
     }
   ]
 >([
@@ -230,12 +358,23 @@ export const AppStateContext = createContext<
     deleteData: () => {},
     fetchData: () => Promise.resolve(), // return a Promise
     createReply: () => {},
+    incrementViewCount: () => {}, // Initialize the function
+    incrementDownloadCount: () => {}, // Initialize the function
+    incrementCommentCount: () => {},
   },
 ]);
 
 // Define a provider component that will provide the state and actions to the components in its tree
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  const incrementDownloadCount = (payload: DownloadCountIncrementPayload) => {
+    dispatch({ type: "INCREMENT_DOWNLOAD_COUNT", payload });
+  };
+
+  const incrementCommentCount = (payload: CommentCountIncrementPayload) => {
+    dispatch({ type: "INCREMENT_COMMENT_COUNT", payload });
+  };
 
   // Fetch data on component mount
   useEffect(() => {
@@ -258,17 +397,16 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   // Function to fetch data from firebase and dispatch it to the reducer
   const fetchData = (
     path: string,
-    actionType: "SET_USERS" | "SET_POSTS" | "SET_COMMENTS" | "SET_FEEDBACKS" // Add SET_COMMENTS here
+    actionType: "SET_USERS" | "SET_POSTS" | "SET_COMMENTS" | "SET_FEEDBACKS"
   ) => {
-    return get(child(dbRefFetch, path)) // add return here
+    return get(child(dbRefFetch, path))
       .then((snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           dispatch({ type: actionType, payload: data });
-          return data; // and return data here
+          return data;
         } else {
-          // console.log("No data available");
-          return null; // and here
+          return null;
         }
       })
       .catch((error) => {
@@ -405,11 +543,31 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
     set(ref(dbRef, `${refPath}/${replyId}`), data)
       .then(() => {
-        fetchData(`comments/${commentUserId}-${commentPostId}`, "SET_COMMENTS");
+        fetchData(`comments`, "SET_COMMENTS");
       })
       .catch((error) => {
         console.error(error);
       });
+  };
+
+  // Function to increment view count and update the database
+  const incrementViewCount = async (payload: ViewCountIncrementPayload) => {
+    const { postId, viewCount } = payload;
+    try {
+      // Send a request to the server to update the view count in the database
+      const viewCountRef = ref(dbRef, `posts/${postId}/views`);
+      await set(viewCountRef, viewCount); // Set the view count to the new value
+
+      // Fetch the updated view count from the server and update the local state using the reducer
+      const updatedViewCountSnap = await get(viewCountRef);
+      const updatedViewCount = updatedViewCountSnap.val() || 0; // If the value is null, use 0 as the default
+      dispatch({
+        type: "INCREMENT_VIEW_COUNT",
+        payload: { postId, viewCount: updatedViewCount },
+      });
+    } catch (error) {
+      console.error("Error updating view count:", error);
+    }
   };
 
   return (
@@ -423,6 +581,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           deleteData,
           fetchData,
           createReply,
+          incrementViewCount,
+          incrementDownloadCount,
+          incrementCommentCount,
         },
       ]}
     >

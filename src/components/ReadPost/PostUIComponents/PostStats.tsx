@@ -12,9 +12,18 @@ import {
 interface PostStatsProps {
   message: string | any;
   postDate: string | any;
+  viewCount: number;
+  downloadCount: number;
+  commentsCount: number;
 }
 
-const PostStats = ({ message, postDate }: PostStatsProps) => {
+const PostStats = ({
+  message,
+  postDate,
+  viewCount,
+  downloadCount,
+  commentsCount,
+}: PostStatsProps) => {
   // Convert postDate to a Date object
   const date = new Date(postDate);
 
@@ -43,11 +52,11 @@ const PostStats = ({ message, postDate }: PostStatsProps) => {
         <StatGroup>
           <Stat size={"sm"} mr={10}>
             <StatLabel>Views</StatLabel>
-            <StatNumber>500</StatNumber>
+            <StatNumber>{viewCount}</StatNumber>
           </Stat>
           <Stat size={"sm"} mr={10}>
             <StatLabel>Downloads</StatLabel>
-            <StatNumber>45</StatNumber>
+            <StatNumber>{downloadCount}</StatNumber>
           </Stat>
           <Stat size={"sm"} mr={10}>
             <StatLabel>Likes</StatLabel>
@@ -55,7 +64,7 @@ const PostStats = ({ message, postDate }: PostStatsProps) => {
           </Stat>
           <Stat size={"sm"} mr={10}>
             <StatLabel>Comment</StatLabel>
-            <StatNumber>10</StatNumber>
+            <StatNumber>{commentsCount}</StatNumber>
           </Stat>
         </StatGroup>
       </Box>
