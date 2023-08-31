@@ -54,8 +54,6 @@ const ResponsiveLayout = () => {
         viewCount: post.views + 1, // Increment the current view count by 1
       };
       incrementViewCount(payload);
-
-      console.log("commentsCount after increment:", post.commentsCount);
     }
   };
 

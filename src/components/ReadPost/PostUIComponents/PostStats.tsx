@@ -1,20 +1,24 @@
 import {
-  StatGroup,
-  Stat,
-  StatLabel,
-  StatNumber,
   Box,
   HStack,
-  VStack,
+  Stat,
+  StatGroup,
+  StatLabel,
+  StatNumber,
   Text,
+  VStack,
 } from "@chakra-ui/react";
+import { useContext, useMemo } from "react";
+import { AppStateContext } from "../../AppStateContext";
 
 interface PostStatsProps {
   message: string | any;
   postDate: string | any;
   viewCount: number;
   downloadCount: number;
-  commentsCount: number;
+  id?: string;
+  userId?: string;
+  commentsCount?: number;
 }
 
 const PostStats = ({
@@ -22,10 +26,16 @@ const PostStats = ({
   postDate,
   viewCount,
   downloadCount,
+  id,
+  userId,
   commentsCount,
 }: PostStatsProps) => {
   // Convert postDate to a Date object
   const date = new Date(postDate);
+
+  const [{ posts }, , {}]: any = useContext(AppStateContext);
+
+  const totalLikes = new Set(posts.id?.likes || []).size;
 
   // Format the date as "day month year"
   const dateOptions: Intl.DateTimeFormatOptions = {
@@ -60,7 +70,7 @@ const PostStats = ({
           </Stat>
           <Stat size={"sm"} mr={10}>
             <StatLabel>Likes</StatLabel>
-            <StatNumber>30</StatNumber>
+            <StatNumber>{totalLikes}</StatNumber>
           </Stat>
           <Stat size={"sm"} mr={10}>
             <StatLabel>Comment</StatLabel>

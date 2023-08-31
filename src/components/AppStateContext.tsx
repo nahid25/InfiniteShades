@@ -63,7 +63,7 @@ export interface Post {
   userName: string;
   image: string;
   postMessage: string;
-  likes: Record<string, boolean>;
+  likes: string[];
   comments: Record<string, Comment>;
   views: number;
   downloads: number;
@@ -114,6 +114,17 @@ export interface CommentCountIncrementPayload {
   commentCount: number;
 }
 
+export interface LikesPayload {
+  postId: string;
+  like: boolean;
+  postUserId: string;
+}
+
+export interface LikesReducerPayload {
+  postId: string;
+  likes: string[];
+}
+
 // Define the state interface and the action types
 interface State {
   users: Record<string, User>;
@@ -136,7 +147,8 @@ type Action =
       type: "INCREMENT_DOWNLOAD_COUNT";
       payload: DownloadCountIncrementPayload;
     }
-  | { type: "INCREMENT_COMMENT_COUNT"; payload: CommentCountIncrementPayload };
+  | { type: "INCREMENT_COMMENT_COUNT"; payload: CommentCountIncrementPayload }
+  | { type: "SET_LIKE"; payload: LikesReducerPayload };
 
 // The initial state of the application
 const initialState: State = {
@@ -164,8 +176,7 @@ function reducer(state: State, action: Action): State {
           if (!post.hasOwnProperty("comments")) {
             post.comments = {};
           }
-          const commentsCount = Object.keys(post.comments).length;
-          return { ...postsDict, [post.id]: { ...post, commentsCount } };
+          return { ...postsDict, [post.id]: { ...post } };
         },
         {}
       );
@@ -218,6 +229,14 @@ function reducer(state: State, action: Action): State {
     case "INCREMENT_COMMENT_COUNT": {
       const { postId, commentCount } = action.payload;
 
+      // Update the download count in Firebase
+      const postKey = `${state.posts[postId].userId}-${postId}`;
+      update(ref(dbRef, `posts/${postKey}`), {
+        commentsCount: commentCount,
+      }).catch((error) => {
+        console.error("Error updating comments count:", error);
+      });
+
       // Update the comment count in the local state (Redux store)
       const updatedPosts = {
         ...state.posts,
@@ -269,6 +288,17 @@ function reducer(state: State, action: Action): State {
         posts: updatedPosts,
       };
     }
+
+    case "SET_LIKE":
+      const { postId, likes }: any = action.payload;
+      const updatedPosts = {
+        ...state.posts,
+        [postId]: {
+          ...state.posts[postId],
+          likes,
+        },
+      };
+      return { ...state, posts: updatedPosts };
 
     default: {
       return state;
@@ -342,11 +372,12 @@ export const AppStateContext = createContext<
       ) => void;
       fetchData: (
         path: string,
-        actionType: "SET_USERS" | "SET_POSTS" | "SET_FEEDBACKS"
+        actionType: "SET_USERS" | "SET_POSTS" | "SET_FEEDBACKS" | "SET_COMMENTS"
       ) => Promise<any>;
       incrementViewCount: (payload: ViewCountIncrementPayload) => void;
       incrementDownloadCount: (payload: DownloadCountIncrementPayload) => void;
       incrementCommentCount: (payload: CommentCountIncrementPayload) => void;
+      setLike: (payload: LikesPayload) => void;
     }
   ]
 >([
@@ -361,6 +392,7 @@ export const AppStateContext = createContext<
     incrementViewCount: () => {}, // Initialize the function
     incrementDownloadCount: () => {}, // Initialize the function
     incrementCommentCount: () => {},
+    setLike: () => {},
   },
 ]);
 
@@ -374,6 +406,32 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const incrementCommentCount = (payload: CommentCountIncrementPayload) => {
     dispatch({ type: "INCREMENT_COMMENT_COUNT", payload });
+  };
+
+  const setLike = (payload: LikesPayload) => {
+    const userId = localStorage.getItem("UserID") || "";
+    const post = state.posts[payload.postId] as Post;
+    let likes = post.likes || [];
+    if (payload.like) {
+      // add like
+      likes.push(userId);
+    } else {
+      // remove like
+      likes = likes.filter((_) => _ !== userId);
+    }
+    // save to db
+    const postKey = `${payload.postUserId}-${payload.postId}`;
+    update(ref(dbRef, `posts/${postKey}`), {
+      likes,
+    }).catch((error) => {
+      console.error("Error updating likes:", error);
+    });
+
+    const reducerPayload: LikesReducerPayload = {
+      likes,
+      postId: payload.postId,
+    };
+    dispatch({ type: "SET_LIKE", payload: reducerPayload });
   };
 
   // Fetch data on component mount
@@ -403,7 +461,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.val();
-          dispatch({ type: actionType, payload: data });
+          if (actionType === "SET_COMMENTS")
+            dispatch({ type: actionType, payload: data });
           return data;
         } else {
           return null;
@@ -584,6 +643,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           incrementViewCount,
           incrementDownloadCount,
           incrementCommentCount,
+          setLike,
         },
       ]}
     >

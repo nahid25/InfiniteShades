@@ -14,19 +14,27 @@ import {
   Tooltip,
   Box,
   Badge,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  Center,
 } from "@chakra-ui/react";
-import { useState, useContext } from "react";
-import { AiOutlineLike } from "react-icons/ai";
+import { useState, useContext, useMemo } from "react";
+import { AiOutlineLike, AiFillLike } from "react-icons/ai";
 import { CgDanger } from "react-icons/cg";
 import { RiArrowDropDownFill } from "react-icons/ri";
-import { AppStateContext } from "../../AppStateContext";
-import { any, number } from "zod";
+import { AppStateContext, User } from "../../AppStateContext";
+import {
+  FormNameInputUI,
+  FormSubmitButtonUI,
+} from "../../shared/FormComponents";
+import { useFormValidation } from "../../shared/Hooks/useFormHandler";
 
 interface PostHeaderProps {
   name: string | any;
   handleModalClose?: () => void;
   showCloseButton?: boolean; // New property
-  post: string | any;
+  post: any;
 }
 
 export const PostHeader = ({
@@ -35,7 +43,59 @@ export const PostHeader = ({
   showCloseButton = true, // Default to true if not provided
   post,
 }: PostHeaderProps) => {
-  const [, { incrementDownloadCount }]: any = useContext(AppStateContext);
+  const [{ posts }, , { incrementDownloadCount, createData, setLike }]: any =
+    useContext(AppStateContext);
+
+  const memoPosts = useMemo(() => {
+    return posts[post?.id];
+  }, [posts]);
+
+  const isLiked = (memoPosts?.likes || []).find(
+    (_: any) => _ === localStorage.getItem("UserID")
+  );
+
+  //Check if Name and Id Exist.
+  const hasNameAndId = () => {
+    const getID = localStorage.getItem("UserID");
+    const getName = localStorage.getItem("UserName");
+    return !!(getID && getName);
+  };
+
+  const handleLike = (data?: any) => {
+    if (hasNameAndId()) {
+      setLike({
+        postId: post.id as string,
+        like: !isLiked,
+        postUserId: post.userId,
+      });
+    } else {
+      // create new user and then like
+      let userId =
+        data?.name.slice(0, 3) + Math.random().toString(36).substr(2, 3);
+      let name = data?.name;
+      const newUser: User = {
+        id: userId,
+        name: name,
+        email: "",
+      };
+      localStorage.setItem("UserID", userId);
+      localStorage.setItem("UserName", name);
+      createData("users", userId, "", newUser);
+      // like the post
+      setLike({
+        postId: post.id as string,
+        like: true,
+        postUserId: post.userId,
+      });
+    }
+  };
+
+  // useFormValidation custom hook for form validation
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useFormValidation(hasNameAndId(), true, true);
 
   const [selectedDownloadOption, setSelectedDownloadOption] = useState("Small");
 
@@ -79,7 +139,7 @@ export const PostHeader = ({
         // Increment the download count by calling the function from the context
         incrementDownloadCount({
           postId: post.id, // assuming the post object has an id property
-          downloadCount: post.downloads + 1, // assuming post object has a downloads property
+          downloadCount: (post.downloads || 0) + 1, // assuming post object has a downloads property
         });
       })
       .catch((error) =>
@@ -110,11 +170,35 @@ export const PostHeader = ({
         </Flex>
         <Flex align="center">
           <HStack>
-            <Button
-              size="sm"
-              variant="outline"
-              leftIcon={<AiOutlineLike />}
-            ></Button>
+            {hasNameAndId() ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleLike}
+                leftIcon={isLiked ? <AiFillLike /> : <AiOutlineLike />}
+              ></Button>
+            ) : (
+              <Popover>
+                <PopoverTrigger>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    leftIcon={<AiOutlineLike />}
+                  ></Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <Box px={2} pb={1}>
+                    <FormNameInputUI register={register} error={errors.name} />
+                    <Center>
+                      <FormSubmitButtonUI
+                        onSubmit={handleSubmit(handleLike)}
+                        content={"Submit"}
+                      />
+                    </Center>
+                  </Box>
+                </PopoverContent>
+              </Popover>
+            )}
             <HStack justifyContent="flex-end" spacing="0">
               <Button
                 colorScheme="green"

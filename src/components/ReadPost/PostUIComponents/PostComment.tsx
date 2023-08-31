@@ -8,7 +8,7 @@ import {
   Text,
   Avatar,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   CommentCountIncrementPayload,
   useAppState,
@@ -21,6 +21,8 @@ const PostComment = ({ postId, userId, commentCount }: any) => {
   const [state, dispatch, { createData, createReply, incrementCommentCount }] =
     useAppState();
   let currentUserId = localStorage.getItem("UserID") || "";
+
+  const post = state?.posts?.[postId];
 
   const [commentUserId, setcommentUserId] = useState("");
   const [commentPostId, setcommentPostId] = useState("");
@@ -40,18 +42,12 @@ const PostComment = ({ postId, userId, commentCount }: any) => {
       // If this is a reply, set the 'replies' field of the original comment
       if (replyTo) {
         // Increment the comment count for the relevant post
-        const commentCountPayload: CommentCountIncrementPayload = {
-          postId: commentPostId,
-          commentCount: relatedComments.length + 1, // Increment the comment count
-        };
-        incrementCommentCount(commentCountPayload);
-
         createReply(commentUserId, commentPostId, commentId, commentData);
       } else {
         // Increment the comment count for the relevant post
         const commentCountPayload: CommentCountIncrementPayload = {
-          postId: commentPostId,
-          commentCount: relatedComments.length + 1, // Increment the comment count
+          postId: postId,
+          commentCount: (post?.commentsCount || 0) + 1, // Increment the comment count
         };
         incrementCommentCount(commentCountPayload);
 
@@ -185,10 +181,6 @@ const PostComment = ({ postId, userId, commentCount }: any) => {
                     </HStack>
                   ))}
               </VStack>
-              <Text mt={2}>
-                {relatedComments.length}{" "}
-                {relatedComments.length === 1 ? "Comment" : "Comments"}
-              </Text>
             </Box>
           ))}
         </VStack>

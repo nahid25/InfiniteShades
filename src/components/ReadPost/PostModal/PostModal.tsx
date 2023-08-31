@@ -60,7 +60,7 @@ const PostModal = ({ isOpen, onClose, post }: PostModalProps) => {
                   postDate={post?.dateUpdated}
                   viewCount={post?.views}
                   downloadCount={post?.downloads}
-                  commentsCount={Object.keys(post?.comments || {}).length}
+                  commentsCount={post?.commentsCount}
                 />
               </Flex>
               <Box>
