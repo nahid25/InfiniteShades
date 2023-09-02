@@ -12,6 +12,7 @@ import {
   Progress,
   Text,
   Heading,
+  Input,
 } from "@chakra-ui/react";
 import { CustomButton } from "../shared/Button";
 import {
@@ -27,6 +28,15 @@ import ImageInput from "./ImageInput";
 const CreatePost = () => {
   // Hook from Chakra UI for controlling the modal
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [tags, setTags] = useState<string[]>([]);
+
+  // Function to handle tags input change
+  const handleTagsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const tagInput = event.target.value;
+    const tagsArray = tagInput.split(",").map((tag) => tag.trim());
+    setTags(tagsArray);
+  };
 
   // State for the uploaded image
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
@@ -145,9 +155,10 @@ const CreatePost = () => {
       userId: getId || userId, // use userId if getId is null
       image: `https://infiniteshades.imgix.net/${imageName}`,
       postMessage: data.message,
-      likes: {}, // TODO: Need to write the logic for likes.
+      likes: "", // TODO: Need to write the logic for likes.
       comments: {}, // TODO: Need to write the logic for comments.
       views: 0,
+      tags: tags,
     };
 
     // Using Context `createData` to uplodad to Firebase.
@@ -181,6 +192,11 @@ const CreatePost = () => {
             {/* Image input field */}
             <FormNameInputUI register={register} error={errors.name} />{" "}
             {/* Name input field */}
+            <Input
+              type="text"
+              placeholder="Enter tags (comma-separated)"
+              onChange={handleTagsChange}
+            />
             <FormMessageInputUI
               placeholderText="Write your post (Optional)"
               register={register}

@@ -19,6 +19,7 @@ interface PostStatsProps {
   id?: string;
   userId?: string;
   commentsCount?: number;
+  likesCount?: number;
 }
 
 const PostStats = ({
@@ -29,6 +30,7 @@ const PostStats = ({
   id,
   userId,
   commentsCount,
+  likesCount,
 }: PostStatsProps) => {
   // Convert postDate to a Date object
   const date = new Date(postDate);
@@ -70,7 +72,7 @@ const PostStats = ({
           </Stat>
           <Stat size={"sm"} mr={10}>
             <StatLabel>Likes</StatLabel>
-            <StatNumber>{totalLikes}</StatNumber>
+            <StatNumber>{likesCount || "0"}</StatNumber>
           </Stat>
           <Stat size={"sm"} mr={10}>
             <StatLabel>Comment</StatLabel>

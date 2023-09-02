@@ -27,7 +27,8 @@
     "react-router-dom": "^6.11.2",
     "uuid": "^9.0.0",
     "uuidv4": "^6.2.13",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "zustand": "^4.4.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
