@@ -104,19 +104,15 @@ const ResponsiveLayout = () => {
     if (isMobileDevice) {
       navigate(`/post/${post.id}/${post.userId}`);
     } else {
-      // setSelectedPost(post);
-      // onOpen();
+      setSelectedPost(post);
+      onOpen();
       // Call incrementViewCount here to increase the view count
-      // const payload: ViewCountIncrementPayload = {
-      //   postId: post.id,
-      //   viewCount: post.views + 1,
-      // };
-      // incrementViewCount(payload);
+      const payload: ViewCountIncrementPayload = {
+        postId: post.id,
+        viewCount: post.views + 1,
+      };
+      incrementViewCount(payload);
     }
-  };
-
-  const handlePopoverClose = () => {
-    likePopoverDisclosure.onClose();
   };
 
   return (
@@ -125,8 +121,10 @@ const ResponsiveLayout = () => {
         <ImageList variant="masonry" cols={cols} gap={8}>
           {Object.values(posts)
             .filter(
-              (post) => selectedTag === null || post.tags.includes(selectedTag)
-            )
+              (post) =>
+                selectedTag === null ||
+                (post.tags && post.tags.includes(selectedTag))
+            ) // Filter posts based on selected tag
             .sort(
               (a: Post, b: Post) =>
                 new Date(b.dateUpdated).getTime() -

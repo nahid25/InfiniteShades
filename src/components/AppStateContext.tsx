@@ -454,39 +454,25 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Function to fetch data from firebase and dispatch it to the reducer
-  const fetchData = async (
+  const fetchData = (
     path: string,
     actionType: "SET_USERS" | "SET_POSTS" | "SET_COMMENTS" | "SET_FEEDBACKS"
   ) => {
-    try {
-      const snapshot = await get(child(dbRefFetch, path));
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        dispatch({ type: actionType, payload: data });
-        return data; // Return the fetched data
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
+    return get(child(dbRefFetch, path))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (actionType === "SET_COMMENTS")
+            dispatch({ type: actionType, payload: data });
+          return data;
+        } else {
+          return null;
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
-
-  // Fetch initial data on component mount
-  useEffect(() => {
-    async function fetchInitialData() {
-      const [users, posts, comments, feedbacks] = await Promise.all([
-        fetchData("users/", "SET_USERS"),
-        fetchData("posts/", "SET_POSTS"),
-        fetchData("comments/", "SET_COMMENTS"),
-        fetchData("feedbacks/", "SET_FEEDBACKS"),
-      ]);
-
-      // Handle any additional processing or data manipulation if needed
-    }
-    fetchInitialData();
-  }, []);
 
   // Function to create new data in firebase and then fetch the updated data
   const createData = (
@@ -535,10 +521,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   // Function to update data in firebase and then fetch the updated data
   const updateData = (
-    path: "users" | "posts" | "comments" | "feedbacks" | "replies",
+    path: "users" | "posts" | "comments" | "feedbacks" | "replies", // Add "replies" here
     id: string,
     userId: string,
-    data: Partial<User | Post | Comment | Feedback | Reply>,
+    data: Partial<User | Post | Comment | Feedback | Reply>, // Add Reply here
     parentId?: string
   ) => {
     let refPath;
@@ -554,26 +540,14 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         if (path === "replies") {
           fetchData(`comments/${userId}-${parentId}`, "SET_COMMENTS");
         } else {
-          // Check if the data object has the 'tags' property
-          if (path === "posts" && "tags" in data) {
-            const updatedPosts = {
-              ...state.posts,
-              [id]: {
-                ...state.posts[id],
-                tags: data.tags as string[],
-              },
-            };
-            dispatch({ type: "SET_POSTS", payload: updatedPosts });
-          } else {
-            fetchData(
-              path,
-              `SET_${path.toUpperCase()}` as
-                | "SET_USERS"
-                | "SET_POSTS"
-                | "SET_COMMENTS"
-                | "SET_FEEDBACKS"
-            );
-          }
+          fetchData(
+            path,
+            `SET_${path.toUpperCase()}` as
+              | "SET_USERS"
+              | "SET_POSTS"
+              | "SET_COMMENTS"
+              | "SET_FEEDBACKS"
+          );
         }
       })
       .catch((error) => {

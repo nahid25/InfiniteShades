@@ -46,7 +46,6 @@ const Layout = ({
   );
   const popularTags = sortedTags.slice(0, 10);
 
-  // Function to handle tag click
   const handleTagClick = (tag: string) => {
     if (selectedTag === tag) {
       setSelectedTag(null); // Deselect the tag if it's already selected
@@ -85,12 +84,11 @@ const Layout = ({
             <ul style={{ listStyle: "none", padding: 0 }}>
               {popularTags.map((tag) => (
                 <li key={tag}>
-                  {/* Use the CustomButton component here */}
                   <Button
                     fontWeight="300"
                     color={"#707070"}
                     borderColor={"#9ACDFF"}
-                    variant={selectedTag === tag ? "solid" : "outline"}
+                    variant={selectedTag === tag ? "solid" : "outline"} // Change variant based on active state
                     _hover={{ color: "#000000", borderColor: "#6495ED" }}
                     size="sm"
                     fontSize="12px"

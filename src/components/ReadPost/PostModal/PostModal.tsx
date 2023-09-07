@@ -59,9 +59,8 @@ const PostModal = ({ isOpen, onClose, post }: PostModalProps) => {
                   message={post?.postMessage}
                   postDate={post?.dateUpdated}
                   viewCount={post?.views}
-                  downloadCount={post?.downloads || 0}
-                  commentsCount={post?.commentsCount || 0}
-                  likesCount={post?.likes.length || 0}
+                  downloadCount={post?.downloads}
+                  commentsCount={post?.commentsCount}
                 />
               </Flex>
               <Box>

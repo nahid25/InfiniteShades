@@ -29,6 +29,7 @@ import {
   FormSubmitButtonUI,
 } from "../../shared/FormComponents";
 import { useFormValidation } from "../../shared/Hooks/useFormHandler";
+import { useLike } from "../../shared/Hooks/useLikePost";
 
 interface PostHeaderProps {
   name: string | any;
@@ -50,9 +51,9 @@ export const PostHeader = ({
     return posts[post?.id];
   }, [posts]);
 
-  const isLiked = (memoPosts?.likes || []).find(
-    (_: any) => _ === localStorage.getItem("UserID")
-  );
+  // const isLiked = (memoPosts?.likes || []).find(
+  //   (_: any) => _ === localStorage.getItem("UserID")
+  // );
 
   //Check if Name and Id Exist.
   const hasNameAndId = () => {
@@ -61,18 +62,21 @@ export const PostHeader = ({
     return !!(getID && getName);
   };
 
+  const { isLiked: isPostLiked, handleLike: handlePostLike } = useLike({
+    postId: post.id,
+    postUserId: post.userId,
+    data: { name },
+  });
+
   const handleLike = (data?: any) => {
     if (hasNameAndId()) {
-      setLike({
-        postId: post.id as string,
-        like: !isLiked,
-        postUserId: post.userId,
-      });
+      handlePostLike();
     } else {
       // create new user and then like
       let userId =
         data?.name.slice(0, 3) + Math.random().toString(36).substr(2, 3);
       let name = data?.name;
+      console.log("userId:", userId); // Log the value of 'userId' here
       const newUser: User = {
         id: userId,
         name: name,
@@ -175,7 +179,7 @@ export const PostHeader = ({
                 size="sm"
                 variant="outline"
                 onClick={handleLike}
-                leftIcon={isLiked ? <AiFillLike /> : <AiOutlineLike />}
+                leftIcon={isPostLiked ? <AiFillLike /> : <AiOutlineLike />}
               ></Button>
             ) : (
               <Popover>

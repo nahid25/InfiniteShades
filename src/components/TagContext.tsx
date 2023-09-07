@@ -7,13 +7,18 @@ interface TagContextType {
 
 const TagContext = createContext<TagContextType | null>(null);
 
-export const TagProvider: React.FC = ({ children }: any) => {
+export const TagProvider: React.FC = ({
+  children,
+}: React.PropsWithChildren<{}>) => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
+  const contextValue = {
+    selectedTag,
+    setSelectedTag,
+  };
+
   return (
-    <TagContext.Provider value={{ selectedTag, setSelectedTag }}>
-      {children}
-    </TagContext.Provider>
+    <TagContext.Provider value={contextValue}>{children}</TagContext.Provider>
   );
 };
 
