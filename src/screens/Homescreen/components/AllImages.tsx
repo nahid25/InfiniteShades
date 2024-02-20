@@ -1,6 +1,6 @@
 import { useEffect, useState, memo, useCallback, useRef } from "react";
-import { Box, Flex, Avatar, Button, useDisclosure } from "@chakra-ui/react";
-import { ImageList, ImageListItem } from "@mui/material";
+import { Box, Flex, Avatar, Button, useDisclosure, useBreakpointValue } from "@chakra-ui/react";
+import { ImageList, ImageListItem, useTheme } from "@mui/material";
 import {
   AiOutlineLike,
   AiOutlineComment,
@@ -14,6 +14,7 @@ import MasonryItemSkeleton from "./MasonryItemSkeleton";
 import InfiniteScroll from 'react-infinite-scroller';
 import { useMediaQueryHook } from "../../../utils/MediaQuery";
 import PostModal from "../../ViewPost/modal/PostModal";
+import { useMediaQuery } from '@mui/material';
 
 interface AllImagesProps {
   selectedTag: string | null; // Add this prop type definition
@@ -30,6 +31,9 @@ const AllImages : React.FC<AllImagesProps> = ({ selectedTag }) => {
   const [lastVisibleDoc, setLastVisibleDoc] = useState<QueryDocumentSnapshot | undefined>(undefined);
 
   const navigate = useNavigate();
+
+  // Define breakpoints for different column counts
+  const columns = useBreakpointValue({ base: 1, md: 2, lg: 3, xl: 3 });
 
   const [isFetching, setIsFetching] = useState(false);
   const fetchPosts = useCallback(async () => {
@@ -68,10 +72,11 @@ const AllImages : React.FC<AllImagesProps> = ({ selectedTag }) => {
           ? allPosts.filter(post => post.tags && post.tags.includes(selectedTag)) 
           : allPosts;
 
+
   return (
     <>
       <Box p={8} sx={{ width: "100%", height: "100%", overflow: "auto" }}>
-        <ImageList variant="masonry" cols={getCols()} gap={8} >
+        <ImageList variant="masonry" cols={columns} gap={8} >
           {allPosts.length === 0
             ? [...Array(10).keys()]
               .map((_) => <MasonryItemSkeleton key={_} />)
@@ -84,12 +89,15 @@ const AllImages : React.FC<AllImagesProps> = ({ selectedTag }) => {
                 >
                   {filteredPosts.map((post: Post) => (
                     <ImageListItem
+                    sx={{ marginBottom: '8px' }}
                       key={post.id}
                       onClick={() => handleImageClick(post)}
                     >
                       <img
                         src={`${post.image}?w=500&fit=crop&auto=format`}
                         srcSet={`${post.image}?w=500&fit=crop&auto=format&dpr=2 2x`}
+                        alt={post.text}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         loading="lazy"
                       />
                       <Box

@@ -50,7 +50,7 @@ const ImageInput = memo(({ onImageChange }: ImageInputProps) => {
         </Text>
       )}
       {/* Show the image name. */}
-      {imageName && <Text fontSize="sm">{imageName}</Text>}
+      {imageName && <Text fontSize="md" fontFamily="'Poppins', sans-serif" textColor={"blackAlpha.700 !important"} mt={5} mb={5}>{imageName}</Text>}
     </VStack>
   );
 });

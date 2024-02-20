@@ -26,7 +26,7 @@ const NavBar = memo(({ customButton }: NavBarProps) => {
   const { name }: any = useContext(LocalStorageContext) || "";
 
   return (
-    <HStack p={8} fontFamily="Poppins, sans-serif">
+    <HStack p={10} fontFamily="Poppins, sans-serif">
       <SiPostcss size={40} />
       <Text>Infinite Shades</Text>
       <Spacer />

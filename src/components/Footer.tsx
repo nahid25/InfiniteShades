@@ -10,14 +10,14 @@ import {memo} from 'react';
 const Footer = memo(() => {
   return (
     <>
-      <Box as="footer" role="contentinfo" py="6" px={{ base: "4", md: "8" }}>
+      <Box as="footer" role="contentinfo" p="10 !important"  px={{ base: "4", md: "8" }}>
         <HStack justify={"space-between"}>
           <SiPostcss size={20} />
           <Text fontSize={"sm"}>Infinite Shades</Text>
 
           <Spacer />
 
-          <HStack spacing={5}>
+          <HStack spacing={5} p={5}>
             <Link href="https://www.instagram.com/_nahid.ekon/" target="_blank">
               <AiFillInstagram size={20} />
             </Link>

@@ -55,13 +55,19 @@ export const FormMessageInputUI = memo(({ register, error, placeholderText }: {r
     </FormControl>
 ));
 
-export const FormTagsInputUI = ({ onChange, value, placeholderText }: any) => (
-    <input
-        placeholder={placeholderText}
-        onChange={onChange}
-        value={value}
-    />
-);
+export const FormTagsInputUI = memo(({ onChange, value, placeholderText, error }: { onChange: any; value: string; placeholderText: string; error?: FieldError }) => (
+    <FormControl pt="20px" pb="20px">
+        <Input
+            onChange={onChange}
+            value={value}
+            placeholder={placeholderText}
+            fontFamily="'Poppins', sans-serif"
+            variant="flushed" // Keeps the style consistent with other inputs
+            width="100%"
+        />
+        {error && <Text color="red">{error.message}</Text>}
+    </FormControl>
+));
 
 
 export const FormSubmitButtonUI = memo(({ onSubmit, title }: {onSubmit: () => void; title: string}) => (

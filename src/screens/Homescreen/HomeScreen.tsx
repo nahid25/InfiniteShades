@@ -24,6 +24,7 @@ export const HomeScreen = memo(() => {
             <CreatePost key="3" />,
           ]}
           onTagSelected={handleTagSelected} 
+          selectedTag={selectedTag} 
           children={ <AllImages selectedTag={selectedTag} />}
         ></Layout>
       );
