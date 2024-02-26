@@ -12,18 +12,45 @@ import {
     Heading,
     Input,
     Text,
+    useToast
 } from "@chakra-ui/react";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import { FaFacebookMessenger } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillGithub, AiFillTwitterCircle } from "react-icons/ai";
-import { memo } from 'react';
 import Layout from "../../components/Layout";
 import { CustomButton, PrimaryButton } from "../../components/Button";
 import { getNameAndId } from "../../utils/helper";
+import { sendLoginLinkToEmail } from '../../services/db';
+import { memo, useState } from "react";
 
 const Login = () => {
+    const [email, setEmail] = useState('');
     const { name } = getNameAndId();
+    const toast = useToast();
+
+    const handleSendSignInLink = async () => {
+        if (email) {
+            try {
+                await sendLoginLinkToEmail(email);
+                toast({
+                    title: 'Check your email',
+                    description: "We've sent you a link to sign in. Please check your email.",
+                    status: 'success',
+                    duration: 9000,
+                    isClosable: true,
+                });
+            } catch (error) {
+                toast({
+                    title: 'Error',
+                    description: "There was an error sending the sign-in link. Please try again.",
+                    status: 'error',
+                    duration: 9000,
+                    isClosable: true,
+                });
+            }
+        }
+    };
     return (
         <Layout
             hideSidebar={true}
@@ -76,9 +103,11 @@ const Login = () => {
                             borderColor="blackAlpha.600"
                             textAlign="center"
                             size="md"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
-                        <Flex justifyContent="center" mt={5}>
-                            <CustomButton buttonText={"Continue with email"} />
+                         <Flex justifyContent="center" mt={5}>
+                            <CustomButton buttonText="Continue with Email" onClick={handleSendSignInLink} />
                         </Flex>
                     </GridItem>
                     <GridItem>

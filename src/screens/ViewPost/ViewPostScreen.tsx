@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Post } from '../../models/Post';
 import { getPostById } from '../../services/db';
 import Layout from '../../components/Layout';
@@ -10,6 +10,8 @@ import PostMobileHeader from './components/mobile/PostMobileHeader';
 import PostMobileStats from './components/mobile/PostMobileStats';
 import PostMobileGuide from './components/mobile/PostMobileGuide';
 import PostComment from './components/PostComment';
+import { PrimaryButton } from '../../components/Button';
+import CreatePost from '../CreatePost/CreatePost';
 
 const ViewPostScreen = memo(() => {
     const { postId } = useParams<{ postId: string }>();
@@ -32,7 +34,15 @@ const ViewPostScreen = memo(() => {
       }
 
       return (
-        <Layout>
+        <Layout createCustomButton={[
+          <Link key="1" to="/about">
+            <PrimaryButton buttonText={"About"} />
+          </Link>,
+          <Link key="2" to="/">
+            <PrimaryButton buttonText={"Home"} _disabled={true} />
+          </Link>,
+          <CreatePost key="3" />,
+        ]}>
           <Flex direction="column" align="center">
             <Box
               w="full"

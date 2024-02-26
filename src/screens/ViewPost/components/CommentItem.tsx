@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Comment } from '../../../models/Post';
 import {
     Box,

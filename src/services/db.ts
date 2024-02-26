@@ -8,6 +8,12 @@ import { getDateInMillis } from "../utils/utils";
 import { getNameAndId } from "../utils/helper";
 import { getDatabase, ref as realTimeRef, set, update, onValue, increment, remove } from "firebase/database";
 import { useCallback, useEffect, useState } from "react";
+import {
+  getAuth,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_apiKey,
@@ -29,6 +35,64 @@ const postStorageRef = ref(storage, 'posts');
 const databaseUsersRef = collection(database, "users");
 
 const realTimeDatabase = getDatabase();
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+
+// Function to check for an existing user profile or create a new one
+const checkOrCreateUserProfile = async (user: any) => {
+  const userRef = doc(database, "users", user.uid);
+  const docSnap = await getDoc(userRef);
+
+  if (!docSnap.exists()) {
+    // Create a new user profile if it doesn't exist
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: user.email,
+      createdAt: new Date(),
+      // Add any other default fields you need
+    });
+    console.log("User profile created");
+  } else {
+    console.log("User profile exists");
+  }
+};
+
+// Function to send sign-in link to email
+export const sendLoginLinkToEmail = async (email: any) => {
+  console.log("Sending sign-in link to email:", email);
+  try {
+    const actionCodeSettings = {
+      url: 'http://localhost:5173/login',
+      handleCodeInApp: true,
+    };
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    window.localStorage.setItem('emailForSignIn', email);
+    console.log("Sign-in link sent to:", email);
+  } catch (error) {
+    console.error("Error sending sign-in link to email:", error);
+  }
+};
+
+
+// Modify your existing function to include profile check/creation
+export const completeSignInWithEmailLink = async (email: string, windowLocationHref: string) => {
+  try {
+    if (isSignInWithEmailLink(auth, windowLocationHref)) {
+      const result = await signInWithEmailLink(auth, email, windowLocationHref);
+      // Clear email from local storage
+      window.localStorage.removeItem('emailForSignIn');
+      // Check or create user profile in Firestore
+      await checkOrCreateUserProfile(result.user);
+      console.log("User signed in:", result.user.uid);
+      return result.user; // You might want to return the user object or profile information here
+    }
+  } catch (error) {
+    console.error("Error signing in with email link:", error);
+  }
+};
 
 export const getPosts = async (lastVisible?: QueryDocumentSnapshot) => {
   let first = query(databsePostRef, limit(docFetchLimit), orderBy('createdAt', 'desc'));

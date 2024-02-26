@@ -1,6 +1,6 @@
 import { useEffect, useState, memo, useCallback, useRef } from "react";
 import { Box, Flex, Avatar, Button, useDisclosure, useBreakpointValue } from "@chakra-ui/react";
-import { ImageList, ImageListItem, useTheme } from "@mui/material";
+import { ImageList, ImageListItem } from "@mui/material";
 import {
   AiOutlineLike,
   AiOutlineComment,
@@ -14,15 +14,14 @@ import MasonryItemSkeleton from "./MasonryItemSkeleton";
 import InfiniteScroll from 'react-infinite-scroller';
 import { useMediaQueryHook } from "../../../utils/MediaQuery";
 import PostModal from "../../ViewPost/modal/PostModal";
-import { useMediaQuery } from '@mui/material';
 
 interface AllImagesProps {
-  selectedTag: string | null; // Add this prop type definition
+  selectedTag: string | null; 
 }
 
 const AllImages : React.FC<AllImagesProps> = ({ selectedTag }) => {
 
-  const {isMobileDevice, getCols} = useMediaQueryHook();
+  const {isMobileDevice} = useMediaQueryHook();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -33,7 +32,7 @@ const AllImages : React.FC<AllImagesProps> = ({ selectedTag }) => {
   const navigate = useNavigate();
 
   // Define breakpoints for different column counts
-  const columns = useBreakpointValue({ base: 1, md: 2, lg: 3, xl: 3 });
+  const columns = useBreakpointValue({ base: 1, md: 2, lg: 3, xl: 4 });
 
   const [isFetching, setIsFetching] = useState(false);
   const fetchPosts = useCallback(async () => {
@@ -75,18 +74,18 @@ const AllImages : React.FC<AllImagesProps> = ({ selectedTag }) => {
 
   return (
     <>
-      <Box p={8} sx={{ width: "100%", height: "100%", overflow: "auto" }}>
-        <ImageList variant="masonry" cols={columns} gap={8} >
+      <Box p={{ base: 2, md: 4, lg: 6 }} maxW="100vw" overflowX="hidden">
+        <ImageList variant="masonry" cols={columns} gap={10}>
           {allPosts.length === 0
             ? [...Array(10).keys()]
               .map((_) => <MasonryItemSkeleton key={_} />)
             : <>
               <InfiniteScroll
-                      initialLoad={false}
-    loadMore={fetchPosts}
-    hasMore={lastVisibleDoc !== undefined}
-    loader={lastVisibleDoc ? <div className="loader" key="loader">Loading ...</div> : null}
-                >
+  initialLoad={false}
+  loadMore={fetchPosts}
+  hasMore={lastVisibleDoc !== undefined}
+  loader={lastVisibleDoc ? <div className="loader" key="loader">Loading ...</div> : undefined}
+>
                   {filteredPosts.map((post: Post) => (
                     <ImageListItem
                     sx={{ marginBottom: '8px' }}

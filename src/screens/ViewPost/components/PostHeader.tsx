@@ -23,6 +23,7 @@ import { DownloadOption, downloadImage } from "../../../utils/utils";
 import { Post } from "../../../models/Post";
 import { memo } from 'react';
 import { useLikes } from "../../../services/db";
+import { PrimaryButton } from "../../../components/Button";
 
 interface PostHeaderProps {
   name: string | any;
@@ -38,7 +39,7 @@ export const PostHeader = memo(({
   post,
 }: PostHeaderProps) => {
 
-  const [selectedDownloadOption, setSelectedDownloadOption] = useState<DownloadOption | undefined>(DownloadOption.Small);
+  const [ ,setSelectedDownloadOption] = useState<DownloadOption | undefined>(DownloadOption.Small);
 
   const { liked, toggleLike } = useLikes(post.id);
 
@@ -55,6 +56,7 @@ export const PostHeader = memo(({
             <Stack pl={1}>
               <Flex>
                 <Avatar name={name} src="" color="white" size={["xs", "sm"]} />
+              <PrimaryButton buttonText={"Home"} _disabled={true} />
                 <Box ml="3">
                   <Text fontWeight="bold" fontSize={["md", "sm"]}>
                     {name}

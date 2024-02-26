@@ -18,13 +18,13 @@ interface TagsButtonProp {
 }
 
 
-export const PrimaryButton = memo(({ buttonText, _disabled, size }: any) => {
+export const PrimaryButton = memo(({ buttonText, _disabled }: any) => {
   return (
     <Button
-      m="10px ! important"
+      m={{ base: "5px", sm: "7px", md: "10px", lg: "10px" }} 
       variant="link"
       colorScheme="blackAlpha"
-      fontSize="sm"
+      fontSize={{ base: "xs", sm: "sm", md: "md", lg: "lg" }} 
       _hover={{ color: "#000000" }}
       isDisabled={_disabled}
       _disabled={{ color: "cornflowerblue" }}
@@ -64,10 +64,8 @@ export const CustomButton = memo(({ buttonText, onClick }: CustomButtonProps) =>
       borderColor={"#9ACDFF"}
       variant={"outline"}
       _hover={{ color: "#000000", borderColor: "#6495ED" }}
-      size="md"
-      fontSize="sm"
-      m="10px !important"
-      fontFamily="Poppins, sans-serif"
+      size={"lg"}
+      fontSize={{ base: "xs !important", md: "sm !important", lg: "md !important" }} 
       onClick={onClick} // use the onClick prop here
     >
       {buttonText}

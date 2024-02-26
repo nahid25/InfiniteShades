@@ -10,9 +10,10 @@ interface LayoutProps {
   children: any;
   hideSidebar?: boolean;
   createCustomButton?: JSX.Element[];
-  onTagSelected: (tag: string) => void; 
-  selectedTag: string | null; 
+  onTagSelected?: (tag: string) => void;  
+  selectedTag?: string | null;            
 }
+
 
 const Layout = memo(({
   children,
@@ -37,7 +38,7 @@ const Layout = memo(({
   return (
     <Grid
     templateRows="auto 1fr auto"
-    templateColumns={{ base: "1fr", lg: "15% 70% 15%" }}
+    templateColumns={{ base: "1fr", lg: "10% 80% 10%" }}
     templateAreas={{
       base: `
         "nav"
@@ -79,7 +80,11 @@ const Layout = memo(({
             m="10px !important"
             fontFamily="Poppins, sans-serif"
             leftIcon={selectedTag === tag ? <GrFormClose /> : undefined}
-            onClick={() => onTagSelected(tag)}
+            onClick={() => {
+              if (onTagSelected) { // Check if onTagSelected is not undefined
+                onTagSelected(tag);
+              }
+            }}
           >
             {tag}
           </Button>

@@ -15,7 +15,7 @@ import {
   ModalFooter,
   Box,
   Flex,
-  Grid,
+  Grid
 } from "@chakra-ui/react";
 
 interface PostModalProps {

@@ -5,6 +5,9 @@ import { initializeApp } from "firebase/app";
 import AboutPage from "./screens/About/AboutPage";
 import Login from "./screens/Login/Login";
 import ViewPostScreen from "./screens/ViewPost/ViewPostScreen";
+import { getAuth, isSignInWithEmailLink } from "firebase/auth";
+import { useEffect } from "react";
+import { completeSignInWithEmailLink } from "./services/db";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_apiKey,
@@ -19,6 +22,24 @@ const firebaseConfig = {
 
 function App() {
   initializeApp(firebaseConfig);
+  const auth = getAuth(); // Get the Auth instance
+
+  useEffect(() => {
+    // Check if the URL is a sign-in with email link.
+    if (isSignInWithEmailLink(auth, window.location.href)) { // Corrected usage
+      let email = window.localStorage.getItem('emailForSignIn');
+      if (!email) {
+        email = window.prompt('Please provide your email for confirmation');
+      }
+      if (email) {
+        completeSignInWithEmailLink(email, window.location.href)
+          .then(() => {
+            // Redirect to the homepage or dashboard after sign-in
+            window.location.assign('/');
+          });
+      }
+    }
+  }, []);
 
   return (
     <Router>

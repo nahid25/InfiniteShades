@@ -1,22 +1,4 @@
 .body{
-<<<<<<< HEAD
-  background-color: #f5f5f7 !important;
-}
-
-h1, h2, h3, h4, h5 {
-  color: #1d1d1f !important;
-  
-}
-p{
-  color: #1d1d1f !important;
-}
-span{
-  color: #1d1d1f !important;
-}
-
-.chakra-avatar{
-  color: #f5f5f7 !important;
-=======
     background-color: #f5f5f7 !important;
 }
 
@@ -33,5 +15,4 @@ span{
 
 .chakra-avatar{
     color: #f5f5f7 !important;
->>>>>>> main
 }

@@ -13,6 +13,7 @@ import {
   PopoverTrigger,
   Spacer,
   Text,
+  Box,
 } from "@chakra-ui/react";
 import { SiPostcss } from "react-icons/si";
 import { Link } from "react-router-dom";
@@ -26,9 +27,18 @@ const NavBar = memo(({ customButton }: NavBarProps) => {
   const { name }: any = useContext(LocalStorageContext) || "";
 
   return (
-    <HStack p={10} fontFamily="Poppins, sans-serif">
-      <SiPostcss size={40} />
-      <Text>Infinite Shades</Text>
+    <HStack
+      p={{ base: 4, sm: 6, md: 8, lg: 10 }} 
+      maxWidth="100vw" 
+      width="full" 
+      spacing={4} 
+      overflowX="hidden" 
+      fontFamily="Poppins, sans-serif"
+    >
+  <SiPostcss size={40} />
+  <Box display={{ base: "none", md: "flex" }} alignItems="center">
+    <Text fontSize={{ base: "xs", md: "sm", lg: "md" }} >Infinite Shades</Text>
+  </Box>
       <Spacer />
       {customButton}
       <Popover>
