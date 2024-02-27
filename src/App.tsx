@@ -8,6 +8,8 @@ import ViewPostScreen from "./screens/ViewPost/ViewPostScreen";
 import { getAuth, isSignInWithEmailLink } from "firebase/auth";
 import { useEffect } from "react";
 import { completeSignInWithEmailLink } from "./services/db";
+import UserProfile from "./screens/User/UserProfile";
+import UserSettings from "./screens/User/UserSettings";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_apiKey,
@@ -47,7 +49,9 @@ function App() {
         <Route path="/" element={<HomeScreen />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/Login" element={<Login />} />
+        <Route path="/UserProfile" element={<UserProfile /> } />
         <Route path="/post/:postId" element={<ViewPostScreen />} />
+        <Route path="/User/Settings" element={<UserSettings /> } />
       </Routes>
     </Router>
   )

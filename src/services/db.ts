@@ -38,7 +38,7 @@ const realTimeDatabase = getDatabase();
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const auth = getAuth(app);
 
 
 // Function to check for an existing user profile or create a new one
