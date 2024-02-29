@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import './App.css'
+import "./App.css";
 import { HomeScreen } from "./screens/Homescreen/HomeScreen";
 import { initializeApp } from "firebase/app";
 import AboutPage from "./screens/About/AboutPage";
@@ -28,17 +28,17 @@ function App() {
 
   useEffect(() => {
     // Check if the URL is a sign-in with email link.
-    if (isSignInWithEmailLink(auth, window.location.href)) { // Corrected usage
-      let email = window.localStorage.getItem('emailForSignIn');
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      // Corrected usage
+      let email = window.localStorage.getItem("emailForSignIn");
       if (!email) {
-        email = window.prompt('Please provide your email for confirmation');
+        email = window.prompt("Please provide your email for confirmation");
       }
       if (email) {
-        completeSignInWithEmailLink(email, window.location.href)
-          .then(() => {
-            // Redirect to the homepage or dashboard after sign-in
-            window.location.assign('/');
-          });
+        completeSignInWithEmailLink(email, window.location.href).then(() => {
+          // Redirect to the homepage or dashboard after sign-in
+          window.location.assign("/");
+        });
       }
     }
   }, []);
@@ -49,12 +49,12 @@ function App() {
         <Route path="/" element={<HomeScreen />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/Login" element={<Login />} />
-        <Route path="/UserProfile" element={<UserProfile /> } />
+        <Route path="/UserProfile" element={<UserProfile />} />
         <Route path="/post/:postId" element={<ViewPostScreen />} />
-        <Route path="/User/Settings" element={<UserSettings /> } />
+        <Route path="/User/Settings" element={<UserSettings />} />
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

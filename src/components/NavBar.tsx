@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { SiPostcss } from "react-icons/si";
 import { Link } from "react-router-dom";
-import {LocalStorageContext} from "../utils/LocalStorageContext";
+import { LocalStorageContext } from "../utils/LocalStorageContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 interface NavBarProps {
@@ -47,17 +47,24 @@ const NavBar = memo(({ customButton }: NavBarProps) => {
 
   return (
     <HStack
-      p={{ base: 4, sm: 6, md: 8, lg: 10 }} 
-      maxWidth="100vw" 
-      width="full" 
-      spacing={4} 
-      overflowX="hidden" 
+      p={{ base: 4, sm: 6, md: 8, lg: 10 }}
+      maxWidth="100vw"
+      width="full"
+      spacing={4}
+      overflowX="hidden"
       fontFamily="Poppins, sans-serif"
     >
-  <SiPostcss size={40} />
-  <Box display={{ base: "none", md: "flex" }} alignItems="center">
-    <Text fontSize={{ base: "xs", md: "sm", lg: "md" }} >Infinite Shades</Text>
-  </Box>
+      <Link to="/">
+        <SiPostcss size={40} />
+      </Link>
+      <Link to="/">
+        <Box display={{ base: "none", md: "flex" }} alignItems="center">
+          <Text fontSize={{ base: "xs", md: "sm", lg: "md" }}>
+            Infinite Shades
+          </Text>
+        </Box>
+      </Link>
+
       <Spacer />
       {customButton}
       <Popover>
@@ -79,27 +86,23 @@ const NavBar = memo(({ customButton }: NavBarProps) => {
           </PopoverHeader>
           <PopoverBody>
             User Name: {name} <br /> Name: {name} <br />
-              
-              {isLoggedIn ? (
-                <Link to="/UserProfile">
-                  UserProfile
-                  </Link>
-              ) : (
-                <Link to="/Login">
-                    <Button
-                    fontWeight="400"
-                    color="#707070"
-                    borderColor="green"
-                    variant="outline"
-                    _hover={{ color: "#000000", borderColor: "green" }}
-                    size="md"
-                    fontSize="sm"
-                  >
-                    Activate
-                  
-                  </Button>
+            {isLoggedIn ? (
+              <Link to="/UserProfile">UserProfile</Link>
+            ) : (
+              <Link to="/Login">
+                <Button
+                  fontWeight="400"
+                  color="#707070"
+                  borderColor="green"
+                  variant="outline"
+                  _hover={{ color: "#000000", borderColor: "green" }}
+                  size="md"
+                  fontSize="sm"
+                >
+                  Activate
+                </Button>
               </Link>
-              )}
+            )}
           </PopoverBody>
         </PopoverContent>
       </Popover>
